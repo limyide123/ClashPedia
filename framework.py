@@ -43,6 +43,12 @@ def welcome_page():
     lb = tk.Label(welcome_frame , text= 'ClashPedia (Clash Royale Encyclopedia)')
     lb.place(x=20 , y = 10)
     lb.pack(padx=10 ,pady=20)
+
+    text_label = tk.Label(welcome_frame, text='Welcome to ClashPedia, your ultimate guide to Clash Royale!\nExplore cards, strategies, updates, and much more.')
+    text_label.pack(pady=10)
+
+    instruction_label = tk.Label(welcome_frame, text='Select an option from the menu to get started.')
+    instruction_label.pack(pady=10)
     welcome_frame.pack()
 
 def categories_page():
