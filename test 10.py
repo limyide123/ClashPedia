@@ -12,9 +12,9 @@ class categories:
         col = 5
         for i in range(rows):
             for j in range(col):
-                fku = i * col + j
-                if fku < len(self.y):
-                    img_path = self.y[fku]
+                hello = i * col + j
+                if hello < len(self.y):
+                    img_path = self.y[hello]
                     img = Image.open(img_path)  # Open each image file
                     img = img.resize((100, 100))
                     img = ImageTk.PhotoImage(img)
