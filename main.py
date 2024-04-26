@@ -9,6 +9,11 @@ from ttkbootstrap import Style
 window = ttk.Window(themename='solar')
 window.title("ClashPedia")
 
+top_frame = tk.Frame(window, bg='#c3c3c3')
+top_frame.pack(side=tk.TOP)
+top_frame.pack_propagate(False)
+top_frame.configure(height='150' , width='1925')
+
 options_frame = tk.Frame(window, bg='#c3c3c3')
 options_frame.pack(side=tk.LEFT)
 options_frame.pack_propagate(False)

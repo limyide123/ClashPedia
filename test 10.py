@@ -15,7 +15,7 @@ class categories:
                 hello = i * col + j
                 if hello < len(self.y):
                     img_path = self.y[hello]
-                    img = Image.open(img_path)  # Open each image file
+                    img = Image.open(img_path) 
                     img = img.resize((100, 100))
                     img = ImageTk.PhotoImage(img)
 
