@@ -73,7 +73,6 @@ def deck_builder_page():
     lb.place(x=20, y=10)
     lb.pack(padx=10, pady=20)
 
-    num_selected = 0
     categories = [("Win Condition", "WinCondition", 1, 2), ("Spells", "Spells", 1, 3), ("Mini Tanks", "MiniTanks", 0, 2), ("Buildings", "Buildings", 0, 2), ("Damage Units", "DamageUnits", 2, 4)]
 
     for section, category, min_val, max_val in categories:
