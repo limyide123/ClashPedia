@@ -102,7 +102,6 @@ def deck_builder_page():
     results_btn = tk.Button(deck_builder_frame, text="Results", command=show_results)
     results_btn.pack(padx=10, pady=10)
 
-vars = {}  # Define a dictionary to store the variables associated with check buttons
 num_selected = 0  # Define a global variable to keep track of the number of selected items
 
 category_counts = {
