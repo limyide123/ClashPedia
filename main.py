@@ -126,8 +126,7 @@ def deck_builder_page():
     results_btn = tk.Button(deck_builder_frame, text="Results", command=show_results)
     results_btn.pack(padx=10, pady=10)
 
-num_selected = 0  # Define a global variable to keep track of the number of selected items
-
+num_selected = 0 
 category_counts = {
     "WinCondition": 0,
     "Spells": 0,
@@ -139,7 +138,6 @@ category_counts = {
 def on_checkbutton_click(var, panel, min_val, max_val, category):
     global num_selected
     if var.get():
-        # Check if total selected cards exceed 8
         if num_selected >= 8:
             messagebox.showwarning("Limit Exceeded", "You can only select up to 8 cards.")
             var.set(False)
