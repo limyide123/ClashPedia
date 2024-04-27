@@ -66,11 +66,11 @@ def categories_page():
         for j in range(min_val, max_val+1):
             try:
                 if category == "Spell":
-                    image_path = f"Spell/{category}/s{j}.png"
+                    image_path = f"clash-royale-card-elixir/Spell/{category}/s{j}.png"
                 elif category == "Buildings":
-                    image_path = f"Buildings/{category}/b{j}.png"
+                    image_path = f"clash-royale-card-elixir/Buildings/{category}/b{j}.png"
                 else:
-                    image_path = f"Troop/t{j}.png"
+                    image_path = f"clash-royale-card-elixir/Troop/t{j}.png"
 
                 img = Image.open(image_path)
                 img = img.resize((90, 120), Image.LANCZOS)
