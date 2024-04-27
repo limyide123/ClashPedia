@@ -108,7 +108,7 @@ def deck_builder_page():
             row_frame.pack()
             for j in range(13):
                 try:
-                    image_path = f"deck_builder_images/{category}/card_{i*13 + j + 1}.png"
+                    image_path = f"clash-royale-card-elixir/{category}/card_{i*13 + j + 1}.png"
                     img = Image.open(image_path)
                     img = img.resize((90, 120), Image.LANCZOS)
                     img = ImageTk.PhotoImage(img)
