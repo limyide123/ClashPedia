@@ -7,6 +7,7 @@ from tkinter import *
 from ttkbootstrap import Style
 from PIL import Image, ImageTk
 from ttkbootstrap.scrolled import ScrolledFrame
+import os
 
 window = ttk.Window(themename='solar')
 window.title("ClashPedia")
@@ -57,30 +58,24 @@ def categories_page():
     lb = tk.Label(categories_frame, text= 'Categories')
     lb.grid(row=0, column=0, columnspan=4, padx=10, pady=20)
 
-    categories = [("Spell", "Spell", 1, 3), ("Buildings", "Buildings", 0, 2), ("Troop", "Troop", 1, 3)]
+    categories_folder = "clash-royale-card-elixir"
+    categories = [("Common", "common"), ("Rare", "rare"), ("Epic", "epic"), ("Legendary", "legendary"), ("Champion", "champion")] # replace with your categories and folder names
 
-    for i, (section, category, min_val, max_val) in enumerate(categories):
+    for i, (section, category) in enumerate(categories):
         lb = tk.Label(categories_frame, text=section)
         lb.grid(row=i+1, column=0, padx=10, pady=10, sticky='w')
 
-        for j in range(min_val, max_val+1):
-            try:
-                if category == "Spell":
-                    image_path = f"clash-royale-card-elixir/Spell/{category}/s{j}.png"
-                elif category == "Buildings":
-                    image_path = f"clash-royale-card-elixir/Buildings/{category}/b{j}.png"
-                else:
-                    image_path = f"clash-royale-card-elixir/Troop/t{j}.png"
-
+        category_folder = os.path.join(categories_folder, category)
+        for j in range(1, 80):
+            filename = f"card_{j}.png"
+            image_path = os.path.join(category_folder, filename)
+            if os.path.exists(image_path):
                 img = Image.open(image_path)
                 img = img.resize((90, 120), Image.LANCZOS)
                 img = ImageTk.PhotoImage(img)
                 panel = tk.Label(categories_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
                 panel.image = img
-                panel.grid(row=i+1, column=j+1, padx=5, pady=5)
-
-            except FileNotFoundError:
-                break
+                panel.grid(row=i+1, column=j, padx=5, pady=5)
 
     categories_frame.pack()
 
