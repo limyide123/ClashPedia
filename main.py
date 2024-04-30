@@ -163,5 +163,3 @@ deck_builder_button = ttk.Button(options_frame , text= 'Deck Builder' , command=
 deck_builder_button.place(x=20 , y= 220, width=130, height=40)
 deck_builder_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
 deck_builder_switch_page.place(x=3, y=220, width=5, height =40)
-
-window.mainloop()
