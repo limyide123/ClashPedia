@@ -7,7 +7,6 @@ from tkinter import *
 from ttkbootstrap import Style
 from PIL import Image, ImageTk
 from ttkbootstrap.scrolled import ScrolledFrame
-import os
 
 window = ttk.Window(themename='solar')
 window.title("ClashPedia")
@@ -55,27 +54,9 @@ def welcome_page():
 
 def categories_page():
     categories_frame = tk.Frame(main_frame)
-    lb = tk.Label(categories_frame, text= 'Categories')
-    lb.grid(row=0, column=0, columnspan=4, padx=10, pady=20)
-
-    categories_folder = "clash-royale-card-elixir"
-    categories = [("Common", "common"), ("Rare", "rare"), ("Epic", "epic"), ("Legendary", "legendary"), ("Champion", "champion")]
-    for i, (section, category) in enumerate(categories):
-        lb = tk.Label(categories_frame, text=section)
-        lb.grid(row=i+1, column=0, padx=10, pady=10, sticky='w')
-
-        category_folder = os.path.join(categories_folder, category)
-        for j in range(1, 80):
-            filename = f"card_{j}.png"
-            image_path = os.path.join(category_folder, filename)
-            if os.path.exists(image_path):
-                img = Image.open(image_path)
-                img = img.resize((90, 120), Image.LANCZOS)
-                img = ImageTk.PhotoImage(img)
-                panel = tk.Label(categories_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
-                panel.image = img
-                panel.grid(row=i+1, column=j, padx=5, pady=5)
-
+    lb = tk.Label(categories_frame , text= 'Categories')
+    lb.place(x=20 , y = 10)
+    lb.pack(padx=10 ,pady=20)
     categories_frame.pack()
 
 def avg_elixir_cal_page():
@@ -84,6 +65,9 @@ def avg_elixir_cal_page():
     lb.place(x=20 , y = 10)
     lb.pack(padx=10 ,pady=20)
     avg_elixir_cal_frame.pack()
+
+def checkbutton_click():
+    print()    
 
 def deck_builder_page():
     deck_builder_frame = ScrolledFrame(main_frame, autohide=True)
@@ -102,7 +86,7 @@ def deck_builder_page():
             row_frame.pack()
             for j in range(13):
                 try:
-                    image_path = f"clash-royale-card-elixir/{category}/card_{i*13 + j + 1}.png"
+                    image_path = f"deck_builder_images/{category}/card_{i*13 + j + 1}.png"
                     img = Image.open(image_path)
                     img = img.resize((90, 120), Image.LANCZOS)
                     img = ImageTk.PhotoImage(img)
@@ -120,7 +104,8 @@ def deck_builder_page():
     results_btn = tk.Button(deck_builder_frame, text="Results", command=show_results)
     results_btn.pack(padx=10, pady=10)
 
-num_selected = 0 
+num_selected = 0  # Define a global variable to keep track of the number of selected items
+
 category_counts = {
     "WinCondition": 0,
     "Spells": 0,
@@ -132,6 +117,7 @@ category_counts = {
 def on_checkbutton_click(var, panel, min_val, max_val, category):
     global num_selected
     if var.get():
+        # Check if total selected cards exceed 8
         if num_selected >= 8:
             messagebox.showwarning("Limit Exceeded", "You can only select up to 8 cards.")
             var.set(False)
@@ -179,6 +165,3 @@ deck_builder_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
 deck_builder_switch_page.place(x=3, y=220, width=5, height =40)
 
 window.mainloop()
-
-
-
