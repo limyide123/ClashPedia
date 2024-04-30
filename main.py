@@ -60,39 +60,10 @@ def categories_page():
     categories_frame.pack()
 
 def avg_elixir_cal_page():
-    avg_elixir_cal_frame = ScrolledFrame(main_frame, autohide=True)
-    avg_elixir_cal_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+    avg_elixir_cal_frame = tk.Frame(main_frame)
     lb = tk.Label(avg_elixir_cal_frame , text= 'Average Elixir Calculator')
     lb.place(x=20 , y = 10)
     lb.pack(padx=10 ,pady=20)
-    
-    categories = [("Elixir 1", "Elixir_1", 1), ("Elixir 2", "Elixir_2", 2), ("Elixir 3", "Elixir_3", 3), ("Elixir 4", "Elixir_4", 4), ("Elixir 5", "Elixir_5", 5), ("Elixir 6", "Elixir_6", 6), ("Elixir 7", "Elixir_7", 7), ("Elixir 8", "Elixir_8", 8), ("Elixir 9", "Elixir_9", 9)]
-
-    for section, category, value in categories:
-        lb = tk.Label(avg_elixir_cal_frame, text=section)
-        lb.pack(padx=10, pady=10)        
-        for i in range(3):
-            row_frame = tk.Frame(avg_elixir_cal_frame)
-            row_frame.pack()
-            for j in range(11):
-                try:
-                    image_path = f"average_elixir_calculator_images/{category}/card_{i*11 + j + 1}.png"
-                    img = Image.open(image_path)
-                    img = img.resize((90, 120), Image.LANCZOS)
-                    img = ImageTk.PhotoImage(img)
-                    panel = tk.Label(row_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
-                    panel.image = img
-                    panel.pack(side=tk.LEFT)
-
-                    var = tk.BooleanVar()
-                    checkbutton = ttk.Checkbutton(row_frame, variable=var, command=lambda v=var, p=panel, val = value, cat=category: checkbutton_click(v, p, val, cat))
-                    checkbutton.pack(side=tk.LEFT, padx=5, pady=5)
-
-                except FileNotFoundError:
-                    break
-
-    results_btn = tk.Button(avg_elixir_cal_frame, text="Results", command=show_results)
-    results_btn.pack(padx=10, pady=10)
     avg_elixir_cal_frame.pack()
 
 def checkbutton_click():
