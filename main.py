@@ -54,27 +54,29 @@ def welcome_page():
     welcome_frame.pack()
 
 def categories_page():
-    categories_frame = tk.Frame(main_frame)
+    categories_frame = ScrolledFrame(main_frame)
+    categories_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
     lb = tk.Label(categories_frame, text= 'Categories')
-    lb.grid(row=0, column=0, columnspan=4, padx=10, pady=20)
+    lb.grid(row=0, column=0, columnspan=13, padx=10, pady=20)
 
     categories_folder = "clash-royale-card-elixir"
     categories = [("Common", "common"), ("Rare", "rare"), ("Epic", "epic"), ("Legendary", "legendary"), ("Champion", "champion")]
     for i, (section, category) in enumerate(categories):
         lb = tk.Label(categories_frame, text=section)
-        lb.grid(row=i+1, column=0, padx=10, pady=10, sticky='w')
+        lb.grid(row=i*5, column=0, columnspan=13, padx=10, pady=10, sticky='ew')
 
         category_folder = os.path.join(categories_folder, category)
-        for j in range(1, 80):
-            filename = f"card_{j}.png"
-            image_path = os.path.join(category_folder, filename)
-            if os.path.exists(image_path):
-                img = Image.open(image_path)
-                img = img.resize((90, 120), Image.LANCZOS)
-                img = ImageTk.PhotoImage(img)
-                panel = tk.Label(categories_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
-                panel.image = img
-                panel.grid(row=i+1, column=j, padx=5, pady=5)
+        for j in range(4):
+            for k in range(13):
+                filename = f"card_{j*13+k+1}.png"
+                image_path = os.path.join(category_folder, filename)
+                if os.path.exists(image_path):
+                    img = Image.open(image_path)
+                    img = img.resize((90, 120), Image.LANCZOS)
+                    img = ImageTk.PhotoImage(img)
+                    panel = tk.Label(categories_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
+                    panel.image = img
+                    panel.grid(row=i*5+1+j, column=k, padx=5, pady=5)
 
     categories_frame.pack()
 
