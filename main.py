@@ -146,12 +146,6 @@ def avg_elixir_cal_page():
     lb.pack(padx=10 ,pady=20)
     avg_elixir_cal_frame.pack()
 
-def checkbutton_click():
-    print()    
-
-def checkbutton_click():
-    print()    
-
 def deck_builder_page():
     deck_builder_frame = ScrolledFrame(main_frame, autohide=True)
     deck_builder_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
@@ -250,7 +244,3 @@ deck_builder_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
 deck_builder_switch_page.place(x=3, y=220, width=5, height =40)
 
 window.mainloop()
-
-
-
-#categories pages has ai develop the file detect cause of i detect wrong file
