@@ -87,6 +87,9 @@ def avg_elixir_cal_page():
     lb.pack(padx=10 ,pady=20)
     avg_elixir_cal_frame.pack()
 
+def checkbutton_click():
+    print()    
+
 def deck_builder_page():
     deck_builder_frame = ScrolledFrame(main_frame, autohide=True)
     deck_builder_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
