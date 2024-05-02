@@ -7,6 +7,7 @@ from tkinter import *
 from ttkbootstrap import Style
 from PIL import Image, ImageTk
 from ttkbootstrap.scrolled import ScrolledFrame
+import os
 
 window = ttk.Window(themename='solar')
 window.title("ClashPedia")
@@ -112,10 +113,30 @@ def welcome_page():
     welcome_frame.pack()
 
 def categories_page():
-    categories_frame = tk.Frame(main_frame)
-    lb = tk.Label(categories_frame , text= 'Categories')
-    lb.place(x=20 , y = 10)
-    lb.pack(padx=10 ,pady=20)
+    categories_frame = ScrolledFrame(main_frame)
+    categories_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+    lb = tk.Label(categories_frame, text= 'Categories')
+    lb.grid(row=0, column=0, columnspan=13, padx=10, pady=20)
+
+    categories_folder = "clash-royale-card-elixir"
+    categories = [("Common", "common"), ("Rare", "rare"), ("Epic", "epic"), ("Legendary", "legendary"), ("Champion", "champion")]
+    for i, (section, category) in enumerate(categories):
+        lb = tk.Label(categories_frame, text=section)
+        lb.grid(row=i*5, column=0, columnspan=13, padx=10, pady=10, sticky='ew')
+
+        category_folder = os.path.join(categories_folder, category)
+        for j in range(4):
+            for k in range(13):
+                filename = f"card_{j*13+k+1}.png"
+                image_path = os.path.join(category_folder, filename)
+                if os.path.exists(image_path):
+                    img = Image.open(image_path)
+                    img = img.resize((90, 120), Image.LANCZOS)
+                    img = ImageTk.PhotoImage(img)
+                    panel = tk.Label(categories_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
+                    panel.image = img
+                    panel.grid(row=i*5+1+j, column=k, padx=5, pady=5)
+
     categories_frame.pack()
 
 def avg_elixir_cal_page():
@@ -128,7 +149,12 @@ def avg_elixir_cal_page():
 def checkbutton_click():
     print()    
 
+def checkbutton_click():
+    print()    
+
 def deck_builder_page():
+    deck_builder_frame = ScrolledFrame(main_frame, autohide=True)
+    deck_builder_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
     deck_builder_frame = ScrolledFrame(main_frame, autohide=True)
     deck_builder_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
     lb = tk.Label(deck_builder_frame, text='Deck Builder')
@@ -224,3 +250,7 @@ deck_builder_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
 deck_builder_switch_page.place(x=3, y=220, width=5, height =40)
 
 window.mainloop()
+
+
+
+#categories pages has ai develop the file detect cause of i detect wrong file
