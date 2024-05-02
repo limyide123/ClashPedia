@@ -149,8 +149,6 @@ def avg_elixir_cal_page():
 def deck_builder_page():
     deck_builder_frame = ScrolledFrame(main_frame, autohide=True)
     deck_builder_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
-    deck_builder_frame = ScrolledFrame(main_frame, autohide=True)
-    deck_builder_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
     lb = tk.Label(deck_builder_frame, text='Deck Builder')
     lb.place(x=20, y=10)
     lb.pack(padx=10, pady=20)
