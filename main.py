@@ -5,6 +5,7 @@ from ttkbootstrap.constants import *
 from tkinter import font
 from tkinter import *
 from ttkbootstrap import Style
+from ttkbootstrap.scrolled import ScrolledFrame
 
 window = ttk.Window(themename='solar')
 window.title("ClashPedia")
@@ -44,7 +45,8 @@ def switch_page(lb ,page):
 
 
 def welcome_page():
-    welcome_frame = tk.Frame(main_frame)
+    welcome_frame = ScrolledFrame(main_frame, padding=5, height=10, autohide=True)
+    welcome_frame.pack(fill=BOTH, expand=YES)
     lb = tk.Label(welcome_frame , text= 'ClashPedia (Clash Royale Encyclopedia)')
     lb.place(x=20 , y = 10)
     lb.pack(padx=10 ,pady=20)
@@ -105,7 +107,6 @@ def welcome_page():
     """
     ranges_info = tk.Label(welcome_frame, text=ranges_text, justify='left')
     ranges_info.pack(pady=5, anchor='w', padx=40)
-
 
     welcome_frame.pack()
 
