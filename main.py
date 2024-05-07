@@ -60,7 +60,7 @@ def categories_page():
     lb.grid(row=0, column=0, columnspan=13, padx=10, pady=20)
 
     categories_folder = "clash-royale-card-elixir"
-    categories = [("Common", "common"), ("Rare", "rare"), ("Epic", "epic"), ("Legendary", "legendary"), ("Champion", "champion")]
+    categories = [("Common", "common"), ("Rare", "rare"), ("Epic", "epic"), ("Legendary", "legendary"), ("Champion", "champion"), ("Funny", "funny")]
     for i, (section, category) in enumerate(categories):
         lb = tk.Label(categories_frame, text=section)
         lb.grid(row=i*5, column=0, columnspan=13, padx=10, pady=10, sticky='ew')
