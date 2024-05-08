@@ -47,10 +47,69 @@ def switch_page(lb ,page):
 
 
 def welcome_page():
-    welcome_frame = tk.Frame(main_frame)
+    welcome_frame = ScrolledFrame(main_frame, padding=5, height=10, autohide=True)
+    welcome_frame.pack(fill=BOTH, expand=YES)
     lb = tk.Label(welcome_frame , text= 'ClashPedia (Clash Royale Encyclopedia)')
     lb.place(x=20 , y = 10)
     lb.pack(padx=10 ,pady=20)
+
+    text_label = tk.Label(welcome_frame, text='Welcome to ClashPedia, your ultimate guide to Clash Royale!\nExplore cards, strategies, updates, and much more.')
+    text_label.pack(pady=10)
+
+    instruction_label = tk.Label(welcome_frame, text='Select an option from the menu to get started.')
+    instruction_label.pack(pady=10)
+    types_of_cards_label = tk.Label(welcome_frame, text='Types of Cards:')
+    types_of_cards_label.pack(pady=10, anchor='w', padx=20)
+
+    types_of_cards_text = """
+    1. Troops: These are units that can move and attack.
+    2. Spells: These are temporary effects that can be cast anywhere on the battlefield.
+    3. Buildings: These are stationary structures that decay over time.
+    4. Tower Troops: These are troops that stay on your Crown Towers and attack enemy troops.
+    """
+    types_of_cards_info = tk.Label(welcome_frame, text=types_of_cards_text, justify='left')
+    types_of_cards_info.pack(pady=5, anchor='w', padx=40)
+
+    rarities_and_levels_label = tk.Label(welcome_frame, text='Rarities and Levels:')
+    rarities_and_levels_label.pack(pady=10, anchor='w', padx=20)
+
+    rarities_and_levels_text = """
+    - Common: Levels 1 to 15
+    - Rare: Levels 3 to 15
+    - Epic: Levels 6 to 15
+     Legendary: Levels 9 to 15
+    - Champion: Levels 11 to 15
+    """
+    rarities_and_levels_info = tk.Label(welcome_frame, text=rarities_and_levels_text, justify='left')
+    rarities_and_levels_info.pack(pady=5, anchor='w', padx=40)
+
+    champion_cards_label = tk.Label(welcome_frame, text='Champion Cards:')
+    champion_cards_label.pack(pady=10, anchor='w', padx=20)
+
+    champion_cards_text = """
+    - Unique troops with special abilities.
+    - Can be activated by tapping an icon on the screen, costing Elixir.
+     Abilities have a cooldown after use.
+    - Not affected by regular card cycle rules.
+    - Only one Champion card allowed in a deck.
+    - Mirror cannot spawn Champions.
+    - Cloned Champions can't use abilities.
+    """
+    champion_cards_info = tk.Label(welcome_frame, text=champion_cards_text, justify='left')
+    champion_cards_info.pack(pady=5, anchor='w', padx=40)
+
+    ranges_label = tk.Label(welcome_frame, text='Ranges:')
+    ranges_label.pack(pady=10, anchor='w', padx=20)
+
+    ranges_text = """
+    - Melee: Short (0.8 tiles or less)
+    - Melee: Medium (1.2 tiles)
+    - Melee: Long (1.6 tiles)
+    - Ranged (2 or more tiles)
+    """
+    ranges_info = tk.Label(welcome_frame, text=ranges_text, justify='left')
+    ranges_info.pack(pady=5, anchor='w', padx=40)
+
     welcome_frame.pack()
 
 def categories_page():
@@ -107,7 +166,7 @@ def deck_builder_page():
             row_frame.pack()
             for j in range(13):
                 try:
-                    image_path = f"clash-royale-card-elixir/{category}/card_{i*13 + j + 1}.png"
+                    image_path = f"deck_builder_images/{category}/card_{i*13 + j + 1}.png"
                     img = Image.open(image_path)
                     img = img.resize((90, 120), Image.LANCZOS)
                     img = ImageTk.PhotoImage(img)
@@ -125,7 +184,8 @@ def deck_builder_page():
     results_btn = tk.Button(deck_builder_frame, text="Results", command=show_results)
     results_btn.pack(padx=10, pady=10)
 
-num_selected = 0 
+num_selected = 0  # Define a global variable to keep track of the number of selected items
+
 category_counts = {
     "WinCondition": 0,
     "Spells": 0,
@@ -137,6 +197,7 @@ category_counts = {
 def on_checkbutton_click(var, panel, min_val, max_val, category):
     global num_selected
     if var.get():
+        # Check if total selected cards exceed 8
         if num_selected >= 8:
             messagebox.showwarning("Limit Exceeded", "You can only select up to 8 cards.")
             var.set(False)
@@ -184,8 +245,3 @@ deck_builder_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
 deck_builder_switch_page.place(x=3, y=220, width=5, height =40)
 
 window.mainloop()
-
-
-
-#categories pages has ai develop the file detect cause of i detect wrong file
-#testing change email link
