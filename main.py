@@ -8,6 +8,7 @@ from ttkbootstrap import Style
 from PIL import Image, ImageTk
 from ttkbootstrap.scrolled import ScrolledFrame
 import os
+from tkinter import PhotoImage
 
 window = ttk.Window(themename='solar')
 window.title("ClashPedia")
@@ -26,6 +27,17 @@ main_frame = tk.Frame(window)
 main_frame.pack(side=LEFT)
 main_frame.pack_propagate(False)
 main_frame.configure(height='1000' ,width='1750')
+
+logo_dir = "design_photo"
+logo_filename = "logo.png"
+logo_path = os.path.join(logo_dir, logo_filename)
+
+logo_img = Image.open(logo_path)
+logo_img = logo_img.resize((160, 150), Image.LANCZOS)
+logo_photo = ImageTk.PhotoImage(logo_img)
+
+logo_label = tk.Label(top_frame, image=logo_photo, bg='#c3c3c3')
+logo_label.place(x=10, y=20)  
 
 def hide_switch_page():
     welcome_switch_page.config(bg='#c3c3c3')
