@@ -188,18 +188,65 @@ def avg_elixir_cal_page():
                     panel.pack(side=tk.LEFT)
 
                     var = tk.BooleanVar()
-                    checkbutton = ttk.Checkbutton(row_frame, variable=var, command=lambda v=var, p=panel, val = value, cat=category: checkbutton_click(v, p, val, cat))
+                    checkbutton = ttk.Checkbutton(row_frame, variable=var, command=lambda v=var, p=panel, val = value, cat=category: elixir_checkbutton_click(v, p, val, cat))
                     checkbutton.pack(side=tk.LEFT, padx=5, pady=5)
 
                 except FileNotFoundError:
                     break
 
-    results_btn = tk.Button(avg_elixir_cal_frame, text="Results", command=show_results)
+    results_btn = tk.Button(avg_elixir_cal_frame, text="Results", command=cal_results)
     results_btn.pack(padx=10, pady=10)
     avg_elixir_cal_frame.pack()
 
-def checkbutton_click():
-    print()    
+elixir_num_selected = 0
+
+elixir_category_counts={
+    "Elixir_1":0,
+    "Elixir_2":0,
+    "Elixir_3":0,
+    "Elixir_4":0,
+    "Elixir_5":0,
+    "Elixir_6":0,
+    "Elixir_7":0,
+    "Elixir_8":0,
+    "Elixir_9":0
+}
+
+def elixir_checkbutton_click(var, panel, val, category):
+    global elixir_num_selected
+    if var.get():
+        # Check if total selected cards exceed 8
+        if elixir_num_selected >= 8:
+            messagebox.showwarning("Limit Exceeded", "You can only select up to 8 cards.")
+            var.set(False)
+            return
+        elixir_category_counts[category] += val
+        elixir_num_selected += 1
+        panel.config(state='normal')
+    else:
+        elixir_category_counts[category] -= val
+        elixir_num_selected -= 1
+        panel.config(state='normal')
+
+def cal_results():
+    total_elixir = sum(elixir_category_counts.values())
+    average_elixir = total_elixir / 8  # Assuming the user selects exactly 8 cards
+
+    feedback = ""
+    if 0.1 <= average_elixir <= 2.0:
+        feedback = "You're a fast cycle guy"
+    elif 2.1 <= average_elixir <= 3.2:
+        feedback = "You're either using 2.6 hog or 2.9 mortar"
+    elif 3.3 <= average_elixir <= 4.1:
+        feedback = "You're not dependent on cycle decks now"
+    elif 4.2 <= average_elixir <= 4.7:
+        feedback = "Woah, that's a bit too expensive"
+    elif 4.8 <= average_elixir <= 5.6:
+        feedback = "Are you trolling at this point?"
+    else:
+        feedback = "I'm certain you're playing 7x elixir"
+
+    messagebox.showinfo("Average Elixir and Feedback", f"Average Elixir: {average_elixir:.2f}\nFeedback: {feedback}")
 
 def deck_builder_page():
     deck_builder_frame = ScrolledFrame(main_frame, autohide=True)
@@ -236,8 +283,7 @@ def deck_builder_page():
     results_btn = tk.Button(deck_builder_frame, text="Results", command=show_results)
     results_btn.pack(padx=10, pady=10)
 
-num_selected = 0  # Define a global variable to keep track of the number of selected items
-
+num_selected = 0 
 category_counts = {
     "WinCondition": 0,
     "Spells": 0,
@@ -296,7 +342,6 @@ deck_builder_button.place(x=20 , y= 220, width=130, height=40)
 deck_builder_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
 deck_builder_switch_page.place(x=3, y=220, width=5, height =40)
 
-window.mainloop()
 avg_elixir_cal_button = ttk.Button(options_frame , text= 'Average Elixir\nCalculator' , command=lambda:switch_page(avg_elixir_cal_switch_page,avg_elixir_cal_page))
 avg_elixir_cal_button.place(x=20 , y= 140, width=130, height=60)
 avg_elixir_cal_switch_page = tk.Label(options_frame, bg='#c3c3c3')
