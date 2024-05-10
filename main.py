@@ -8,6 +8,7 @@ from ttkbootstrap import Style
 from PIL import Image, ImageTk
 from ttkbootstrap.scrolled import ScrolledFrame
 import os
+from tkinter import PhotoImage
 
 window = ttk.Window(themename='solar')
 window.title("ClashPedia")
@@ -26,6 +27,17 @@ main_frame = tk.Frame(window)
 main_frame.pack(side=LEFT)
 main_frame.pack_propagate(False)
 main_frame.configure(height='1000' ,width='1750')
+
+logo_dir = "design_photo"
+logo_filename = "logo.png"
+logo_path = os.path.join(logo_dir, logo_filename)
+
+logo_img = Image.open(logo_path)
+logo_img = logo_img.resize((160, 150), Image.LANCZOS)
+logo_photo = ImageTk.PhotoImage(logo_img)
+
+logo_label = tk.Label(top_frame, image=logo_photo, bg='#c3c3c3')
+logo_label.place(x=10, y=20)  
 
 def hide_switch_page():
     welcome_switch_page.config(bg='#c3c3c3')
@@ -151,10 +163,39 @@ def show_image(event, img):
     image_label.pack(padx=100, pady=100)
 
 def avg_elixir_cal_page():
-    avg_elixir_cal_frame = tk.Frame(main_frame)
+    avg_elixir_cal_frame = ScrolledFrame(main_frame, autohide=True)
+    avg_elixir_cal_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
     lb = tk.Label(avg_elixir_cal_frame , text= 'Average Elixir Calculator')
     lb.place(x=20 , y = 10)
     lb.pack(padx=10 ,pady=20)
+    
+    categories = [("Elixir 1", "Elixir_1", 1), ("Elixir 2", "Elixir_2", 2), ("Elixir 3", "Elixir_3", 3), ("Elixir 4", "Elixir_4", 4), ("Elixir 5", "Elixir_5", 5), ("Elixir 6", "Elixir_6", 6), ("Elixir 7", "Elixir_7", 7), ("Elixir 8", "Elixir_8", 8), ("Elixir 9", "Elixir_9", 9)]
+
+    for section, category, value in categories:
+        lb = tk.Label(avg_elixir_cal_frame, text=section)
+        lb.pack(padx=10, pady=10)        
+        for i in range(3):
+            row_frame = tk.Frame(avg_elixir_cal_frame)
+            row_frame.pack()
+            for j in range(11):
+                try:
+                    image_path = f"average_elixir_calculator_images/{category}/card_{i*11 + j + 1}.png"
+                    img = Image.open(image_path)
+                    img = img.resize((90, 120), Image.LANCZOS)
+                    img = ImageTk.PhotoImage(img)
+                    panel = tk.Label(row_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
+                    panel.image = img
+                    panel.pack(side=tk.LEFT)
+
+                    var = tk.BooleanVar()
+                    checkbutton = ttk.Checkbutton(row_frame, variable=var, command=lambda v=var, p=panel, val = value, cat=category: checkbutton_click(v, p, val, cat))
+                    checkbutton.pack(side=tk.LEFT, padx=5, pady=5)
+
+                except FileNotFoundError:
+                    break
+
+    results_btn = tk.Button(avg_elixir_cal_frame, text="Results", command=show_results)
+    results_btn.pack(padx=10, pady=10)
     avg_elixir_cal_frame.pack()
 
 def checkbutton_click():
