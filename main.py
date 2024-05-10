@@ -120,6 +120,7 @@ def categories_page():
 
     categories_folder = "clash-royale-card-elixir"
     categories = [("Common", "common"), ("Rare", "rare"), ("Epic", "epic"), ("Legendary", "legendary"), ("Champion", "champion"), ("Funny", "funny")]
+
     for i, (section, category) in enumerate(categories):
         lb = tk.Label(categories_frame, text=section)
         lb.grid(row=i*5, column=0, columnspan=13, padx=10, pady=10, sticky='ew')
@@ -137,7 +138,17 @@ def categories_page():
                     panel.image = img
                     panel.grid(row=i*5+1+j, column=k, padx=5, pady=5)
 
+                    panel.bind("<Button>", lambda e, img=img: show_image(e, img))
+
     categories_frame.pack()
+
+def show_image(event, img):
+    image_window = tk.Toplevel()
+    image_window.title("Card Image")
+    image_window.geometry("600x800")
+
+    image_label = tk.Label(image_window, image=img)
+    image_label.pack(padx=100, pady=100)
 
 def avg_elixir_cal_page():
     avg_elixir_cal_frame = tk.Frame(main_frame)
@@ -234,6 +245,17 @@ categories_button.place(x=20 , y= 80, width=130)
 categories_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
 categories_switch_page.place(x=3, y=80, width=5, height =40)
 
+avg_elixir_cal_button = ttk.Button(options_frame , text= 'Average Elixir\nCalculator' , command=lambda:switch_page(avg_elixir_cal_switch_page,avg_elixir_cal_page))
+avg_elixir_cal_button.place(x=20 , y= 140, width=130, height=60)
+avg_elixir_cal_switch_page = tk.Label(options_frame, bg='#c3c3c3')
+avg_elixir_cal_switch_page.place(x=3, y=140, width=5, height =60)
+
+deck_builder_button = ttk.Button(options_frame , text= 'Deck Builder' , command=lambda:switch_page(deck_builder_switch_page,deck_builder_page))
+deck_builder_button.place(x=20 , y= 220, width=130, height=40)
+deck_builder_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
+deck_builder_switch_page.place(x=3, y=220, width=5, height =40)
+
+window.mainloop()
 avg_elixir_cal_button = ttk.Button(options_frame , text= 'Average Elixir\nCalculator' , command=lambda:switch_page(avg_elixir_cal_switch_page,avg_elixir_cal_page))
 avg_elixir_cal_button.place(x=20 , y= 140, width=130, height=60)
 avg_elixir_cal_switch_page = tk.Label(options_frame, bg='#c3c3c3')
