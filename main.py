@@ -236,7 +236,6 @@ def cal_results():
         feedback = "I'm certain you're playing 7x elixir"
 
     messagebox.showinfo("Average Elixir and Feedback", f"Average Elixir: {average_elixir:.2f}\nFeedback: {feedback}")
-    print(total_elixir)
 
 def deck_builder_page():
     deck_builder_frame = ScrolledFrame(main_frame, autohide=True)
