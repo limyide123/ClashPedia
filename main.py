@@ -155,12 +155,21 @@ def categories_page():
     categories_frame.pack()
 
 def show_image(event, img):
-    image_window = tk.Toplevel()
+    image_window = tk.Toplevel(window)
     image_window.title("Card Image")
     image_window.geometry("600x800")
+    image_window.transient(window)
+    image_window.grab_set()
 
     image_label = tk.Label(image_window, image=img)
     image_label.pack(padx=100, pady=100)
+
+    image_window.rowconfigure(0, weight=1)
+    image_window.columnconfigure(0, weight=1)
+    image_label.config(width=image_window.winfo_screenwidth()*2, height=image_window.winfo_screenheight()*2)
+    image_label.pack_forget()
+    image_label.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+    image_label.bind("<Configure>", lambda e: image_label.config(width=e.width*2, height=e.height*2))
 
 def avg_elixir_cal_page():
     avg_elixir_cal_frame = ScrolledFrame(main_frame, autohide=True)
@@ -292,7 +301,7 @@ avg_elixir_cal_switch_page = tk.Label(options_frame, bg='#c3c3c3')
 avg_elixir_cal_switch_page.place(x=3, y=140, width=5, height =60)
 
 deck_builder_button = ttk.Button(options_frame , text= 'Deck Builder' , command=lambda:switch_page(deck_builder_switch_page,deck_builder_page))
-deck_builder_button.place(x=20 , y= 220, width=130, height=40)
+deck_builder_button.place(x=20 , y= 220, width=130, height=40)                      
 deck_builder_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
 deck_builder_switch_page.place(x=3, y=220, width=5, height =40)
 
