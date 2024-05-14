@@ -171,16 +171,15 @@ def welcome_page():
 
     welcome_frame.pack()
     
-<<<<<<< HEAD
-def categories_page(order='default'):
+def categories_page(gg='default'):
     delete_page()
     
     # Frame for sorting buttons
     button_frame = tk.Frame(main_frame)
     button_frame.pack(fill=X, padx=10, pady=5)
     
-    def refresh_categories(order):
-        categories_page(order)
+    def refresh_categories(gg):
+        categories_page(gg)
     
     type_button = ttk.Button(button_frame, text='Type', command=lambda: refresh_categories('type'))
     type_button.pack(side=LEFT, padx=5)
@@ -194,9 +193,6 @@ def categories_page(order='default'):
     rarity_button = ttk.Button(button_frame, text='Rarity', command=lambda: refresh_categories('rarity'))
     rarity_button.pack(side=LEFT, padx=5)
 
-=======
-def categories_page():
->>>>>>> c23b877e180f7c66282d7ba816910c92213e86f3
     categories_frame = ScrolledFrame(main_frame)
     categories_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 
@@ -206,27 +202,18 @@ def categories_page():
     categories_folder = "clash-royale-card-elixir"
     categories = [("Common", "common"), ("Rare", "rare"), ("Epic", "epic"), ("Legendary", "legendary"), ("Champion", "champion"), ("Funny", "funny")]
     
-    if order == 'type':
+    if gg == 'type':
         categories.sort(key=lambda x: x[0])
-    elif order == 'arena':
+    elif gg == 'arena':
         pass
-    elif order == 'elixir':
+    elif gg == 'elixir':
         pass
-    elif order == 'rarity':
+    elif gg == 'rarity':
         categories = sorted(categories, key=lambda x: ['common', 'rare', 'epic', 'legendary', 'champion', 'funny'].index(x[1]))
 
     for i, (section, category) in enumerate(categories):
-<<<<<<< HEAD
         lb = tk.Label(categories_frame, text=section)
         lb.grid(row=i * 5, column=0, columnspan=13, padx=10, pady=10, sticky='ew')
-=======
-
-        category_frame = tk.Frame(categories_frame, bg="white", bd=2, relief=tk.GROOVE)
-        category_frame.grid(row=i*5, column=0, columnspan=13, padx=10, pady=10, sticky='ew')
-
-        lb = tk.Label(category_frame, text=section, font=('Showcard Gothic', 15, 'bold'))
-        lb.grid(row=0, column=0, columnspan=13, padx=10, pady=10, sticky='ew')
->>>>>>> c23b877e180f7c66282d7ba816910c92213e86f3
 
         category_folder = os.path.join(categories_folder, category)
         for j in range(4):
@@ -237,13 +224,9 @@ def categories_page():
                     img = Image.open(image_path)
                     img = img.resize((90, 120), Image.LANCZOS)
                     img = ImageTk.PhotoImage(img)
-                    panel = tk.Label(category_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
+                    panel = tk.Label(categories_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
                     panel.image = img
-<<<<<<< HEAD
                     panel.grid(row=i * 5 + 1 + j, column=k, padx=5, pady=5)
-=======
-                    panel.grid(row=j+1, column=k, padx=5, pady=5)
->>>>>>> c23b877e180f7c66282d7ba816910c92213e86f3
 
                     panel.bind("<Button>", lambda e, img=img: show_image(e, img))
 
