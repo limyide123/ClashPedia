@@ -178,6 +178,7 @@ def categories_page(gg='default'):
     button_frame = tk.Frame(main_frame)
     button_frame.pack(fill=X, padx=10, pady=5)
     
+    #ai gengerate for order change to gg because have conflig
     def refresh_categories(gg):
         categories_page(gg)
     
