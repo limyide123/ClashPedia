@@ -440,16 +440,6 @@ avg_elixir_cal_switch_page = tk.Label(options_frame, bg='#c3c3c3')
 avg_elixir_cal_switch_page.place(x=3, y=140, width=5, height =60)
 
 deck_builder_button = ttk.Button(options_frame , text= 'Deck Builder' , command=lambda:switch_page(deck_builder_switch_page,deck_builder_page))
-deck_builder_button.place(x=20 , y= 220, width=130, height=40)                      
-deck_builder_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
-deck_builder_switch_page.place(x=3, y=220, width=5, height =40)
-
-avg_elixir_cal_button = ttk.Button(options_frame , text= 'Average Elixir\nCalculator' , command=lambda:switch_page(avg_elixir_cal_switch_page,avg_elixir_cal_page))
-avg_elixir_cal_button.place(x=20 , y= 140, width=130, height=60)
-avg_elixir_cal_switch_page = tk.Label(options_frame, bg='#c3c3c3')
-avg_elixir_cal_switch_page.place(x=3, y=140, width=5, height =60)
-
-deck_builder_button = ttk.Button(options_frame , text= 'Deck Builder' , command=lambda:switch_page(deck_builder_switch_page,deck_builder_page))
 deck_builder_button.place(x=20 , y= 220, width=130, height=40)
 deck_builder_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
 deck_builder_switch_page.place(x=3, y=220, width=5, height =40)
