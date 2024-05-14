@@ -18,6 +18,10 @@ top_frame.pack(side=tk.TOP)
 top_frame.pack_propagate(False)
 top_frame.configure(height='150' , width='1925')
 
+lb = tk.Label(top_frame , text= 'ClashPedia (Clash Royale Encyclopedia)', font=('Showcard Gothic', 36, 'bold'))
+lb.place(x=20 , y = 10)
+lb.pack(padx=10 ,pady=20)
+
 options_frame = tk.Frame(window, bg='#c3c3c3')
 options_frame.pack(side=tk.LEFT)
 options_frame.pack_propagate(False)
@@ -61,56 +65,99 @@ def switch_page(lb ,page):
 def welcome_page():
     welcome_frame = ScrolledFrame(main_frame, padding=5, height=10, autohide=True)
     welcome_frame.pack(fill=BOTH, expand=YES)
-    lb = tk.Label(welcome_frame , text= 'ClashPedia (Clash Royale Encyclopedia)')
-    lb.place(x=20 , y = 10)
-    lb.pack(padx=10 ,pady=20)
 
-    text_label = tk.Label(welcome_frame, text='Welcome to ClashPedia, your ultimate guide to Clash Royale!\nExplore cards, strategies, updates, and much more.')
+    text_label = tk.Label(welcome_frame, text='Welcome to ClashPedia, your ultimate guide to Clash Royale!\nExplore cards, strategies, updates, and much more.', font=('Showcard Gothic', 23, 'bold'))
     text_label.pack(pady=10)
 
-    instruction_label = tk.Label(welcome_frame, text='Select an option from the menu to get started.')
-    instruction_label.pack(pady=10)
-    types_of_cards_label = tk.Label(welcome_frame, text='Types of Cards:')
-    types_of_cards_label.pack(pady=10, anchor='w', padx=20)
+    banner_path = "design_photo/banner.png"
+    image = Image.open(banner_path)
+    image = ImageTk.PhotoImage(image)
 
-    types_of_cards_text = """
+    image_label = tk.Label(welcome_frame, image=image)
+    image_label.image = image
+    image_label.pack()
+
+    tutorial_of_cards_label = tk.Label(welcome_frame, text='What is "CLASH ROYALE?"', font=('Rockwell Extra Bold', 15, 'bold'))
+    tutorial_of_cards_label.pack(pady=10, anchor='w', padx=20)
+
+    tutorial_of_cards_text = """
+    Winning Battles:
+    - Get more Crowns than your opponent by destroying their Crown Towers.
+    - Destroying the opponent's King's Tower instantly gives you 3 Crowns and wins the game.
+    - If no King's Tower is destroyed, the player with more Crowns at the end of the 3-minute period wins.
+    - If neither player has more Crowns, the game goes into Overtime.
+    - Overtime ends if a Crown Tower is destroyed, deciding the winner.
+    - If all towers have identical health, a tiebreaker occurs where towers rapidly lose health until one is destroyed.
+
+    Trophies and Rewards:
+    - Winning earns Trophies, while losing loses them.
+    - Trophies unlock new Arenas and higher Leagues.
+    - New Arenas offer new Cards and better rewards.
+    - Victory in Challenges and Tournaments earns rewards and progresses in the event.
+
+    Clan Wars:
+    - In a stalemate, a coin flip decides the winner.
+    - Trophies contribute to Clan War standings and rewards.1. Troops: These are units that can move and attack.
+        2. Spells: These are temporary effects that can be cast anywhere on the battlefield.
+        3. Buildings: These are stationary structures that decay over time.
+        4. Tower Troops: These are troops that stay on your Crown Towers and attack enemy troops.
+    """
+    tutorial_of_cards_info = tk.Label(welcome_frame, text=tutorial_of_cards_text, justify='left')
+    tutorial_of_cards_info.pack(pady=5, anchor='w', padx=40)  
+
+    types_frame = tk.Frame(welcome_frame, bg="white", bd=2, relief=tk.GROOVE)
+    types_frame.pack(pady=10, padx=20, fill=tk.BOTH, expand=True)
+
+    tutorial_of_cards_label = tk.Label(types_frame, text='Types of Cards:', font=('Rockwell Extra Bold', 15, 'bold'))
+    tutorial_of_cards_label.pack(pady=10, anchor='w', padx=20)
+
+    tutorial_of_cards_text = """
     1. Troops: These are units that can move and attack.
     2. Spells: These are temporary effects that can be cast anywhere on the battlefield.
     3. Buildings: These are stationary structures that decay over time.
     4. Tower Troops: These are troops that stay on your Crown Towers and attack enemy troops.
     """
-    types_of_cards_info = tk.Label(welcome_frame, text=types_of_cards_text, justify='left')
-    types_of_cards_info.pack(pady=5, anchor='w', padx=40)
+    tutorial_of_cards_info = tk.Label(types_frame, text=tutorial_of_cards_text, justify='left')
+    tutorial_of_cards_info.pack(pady=5, anchor='w', padx=40)
 
-    rarities_and_levels_label = tk.Label(welcome_frame, text='Rarities and Levels:')
+    rarities_frame = tk.Frame(welcome_frame, bg="white", bd=2, relief=tk.GROOVE)
+    rarities_frame.pack(pady=10, padx=20, fill=tk.BOTH, expand=True)
+
+    rarities_and_levels_label = tk.Label(rarities_frame, text='Rarities and Levels:', font=('Rockwell Extra Bold', 15, 'bold'))
     rarities_and_levels_label.pack(pady=10, anchor='w', padx=20)
 
     rarities_and_levels_text = """
     - Common: Levels 1 to 15
     - Rare: Levels 3 to 15
     - Epic: Levels 6 to 15
-     Legendary: Levels 9 to 15
+    - Legendary: Levels 9 to 15
     - Champion: Levels 11 to 15
     """
-    rarities_and_levels_info = tk.Label(welcome_frame, text=rarities_and_levels_text, justify='left')
+    rarities_and_levels_info = tk.Label(rarities_frame, text=rarities_and_levels_text, justify='left')
     rarities_and_levels_info.pack(pady=5, anchor='w', padx=40)
 
-    champion_cards_label = tk.Label(welcome_frame, text='Champion Cards:')
+    champion_frame = tk.Frame(welcome_frame, bg="white", bd=2, relief=tk.GROOVE)
+    champion_frame.pack(pady=10, padx=20, fill=tk.BOTH, expand=True)
+
+    champion_cards_label = tk.Label(champion_frame, text='Champion Cards:', font=('Rockwell Extra Bold', 15, 'bold'))
     champion_cards_label.pack(pady=10, anchor='w', padx=20)
 
     champion_cards_text = """
     - Unique troops with special abilities.
     - Can be activated by tapping an icon on the screen, costing Elixir.
-     Abilities have a cooldown after use.
+    - Abilities have a cooldown after use.
     - Not affected by regular card cycle rules.
     - Only one Champion card allowed in a deck.
     - Mirror cannot spawn Champions.
     - Cloned Champions can't use abilities.
     """
-    champion_cards_info = tk.Label(welcome_frame, text=champion_cards_text, justify='left')
+    champion_cards_info = tk.Label(champion_frame, text=champion_cards_text, justify='left')
     champion_cards_info.pack(pady=5, anchor='w', padx=40)
 
-    ranges_label = tk.Label(welcome_frame, text='Ranges:')
+    ranges_frame = tk.Frame(welcome_frame, bg="white", bd=2, relief=tk.GROOVE)
+    ranges_frame.pack(pady=10, padx=20, fill=tk.BOTH, expand=True)
+
+    ranges_label = tk.Label(ranges_frame, text='Ranges:', font=('Rockwell Extra Bold', 15, 'bold'))
     ranges_label.pack(pady=10, anchor='w', padx=20)
 
     ranges_text = """
@@ -119,28 +166,59 @@ def welcome_page():
     - Melee: Long (1.6 tiles)
     - Ranged (2 or more tiles)
     """
-    ranges_info = tk.Label(welcome_frame, text=ranges_text, justify='left')
+    ranges_info = tk.Label(ranges_frame, text=ranges_text, justify='left')
     ranges_info.pack(pady=5, anchor='w', padx=40)
 
     welcome_frame.pack()
+    
+def categories_page(order='default'):
+    delete_page()
+    
+    # Frame for sorting buttons
+    button_frame = tk.Frame(main_frame)
+    button_frame.pack(fill=X, padx=10, pady=5)
+    
+    def refresh_categories(order):
+        categories_page(order)
+    
+    type_button = ttk.Button(button_frame, text='Type', command=lambda: refresh_categories('type'))
+    type_button.pack(side=LEFT, padx=5)
 
-def categories_page():
+    arena_button = ttk.Button(button_frame, text='Arena', command=lambda: refresh_categories('arena'))
+    arena_button.pack(side=LEFT, padx=5)
+
+    elixir_button = ttk.Button(button_frame, text='Elixir', command=lambda: refresh_categories('elixir'))
+    elixir_button.pack(side=LEFT, padx=5)
+
+    rarity_button = ttk.Button(button_frame, text='Rarity', command=lambda: refresh_categories('rarity'))
+    rarity_button.pack(side=LEFT, padx=5)
+
     categories_frame = ScrolledFrame(main_frame)
     categories_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
-    lb = tk.Label(categories_frame, text= 'Categories')
+
+    lb = tk.Label(categories_frame, text='Categories')
     lb.grid(row=0, column=0, columnspan=13, padx=10, pady=20)
 
     categories_folder = "clash-royale-card-elixir"
     categories = [("Common", "common"), ("Rare", "rare"), ("Epic", "epic"), ("Legendary", "legendary"), ("Champion", "champion"), ("Funny", "funny")]
+    
+    if order == 'type':
+        categories.sort(key=lambda x: x[0])
+    elif order == 'arena':
+        pass
+    elif order == 'elixir':
+        pass
+    elif order == 'rarity':
+        categories = sorted(categories, key=lambda x: ['common', 'rare', 'epic', 'legendary', 'champion', 'funny'].index(x[1]))
 
     for i, (section, category) in enumerate(categories):
         lb = tk.Label(categories_frame, text=section)
-        lb.grid(row=i*5, column=0, columnspan=13, padx=10, pady=10, sticky='ew')
+        lb.grid(row=i * 5, column=0, columnspan=13, padx=10, pady=10, sticky='ew')
 
         category_folder = os.path.join(categories_folder, category)
         for j in range(4):
             for k in range(13):
-                filename = f"card_{j*13+k+1}.png"
+                filename = f"card_{j * 13 + k + 1}.png"
                 image_path = os.path.join(category_folder, filename)
                 if os.path.exists(image_path):
                     img = Image.open(image_path)
@@ -148,7 +226,7 @@ def categories_page():
                     img = ImageTk.PhotoImage(img)
                     panel = tk.Label(categories_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
                     panel.image = img
-                    panel.grid(row=i*5+1+j, column=k, padx=5, pady=5)
+                    panel.grid(row=i * 5 + 1 + j, column=k, padx=5, pady=5)
 
                     panel.bind("<Button>", lambda e, img=img: show_image(e, img))
 
@@ -161,6 +239,8 @@ def show_image(event, img):
     image_window.transient(window)
     image_window.grab_set()
 
+    image_window.config(bd=2, relief="groove")
+
     image_label = tk.Label(image_window, image=img)
     image_label.pack(padx=100, pady=100)
 
@@ -168,8 +248,9 @@ def show_image(event, img):
     image_window.columnconfigure(0, weight=1)
     image_label.config(width=image_window.winfo_screenwidth()*2, height=image_window.winfo_screenheight()*2)
     image_label.pack_forget()
-    image_label.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-    image_label.bind("<Configure>", lambda e: image_label.config(width=e.width*2, height=e.height*2))
+    image_label.pack(padx=100, pady=100)
+
+    image_window.mainloop()
 
 def avg_elixir_cal_page():
     avg_elixir_cal_frame = ScrolledFrame(main_frame, autohide=True)
@@ -260,17 +341,20 @@ def cal_results():
 def deck_builder_page():
     deck_builder_frame = ScrolledFrame(main_frame, autohide=True)
     deck_builder_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
-    lb = tk.Label(deck_builder_frame, text='Deck Builder')
+    lb = tk.Label(deck_builder_frame, text='Deck Builder', font=('Showcard Gothic', 15, 'bold'))
     lb.place(x=20, y=10)
     lb.pack(padx=10, pady=20)
 
     categories = [("Win Condition", "WinCondition", 1, 2), ("Spells", "Spells", 1, 3), ("Mini Tanks", "MiniTanks", 0, 2), ("Buildings", "Buildings", 0, 2), ("Damage Units", "DamageUnits", 2, 4)]
 
     for section, category, min_val, max_val in categories:
-        lb = tk.Label(deck_builder_frame, text=section)
+        category_frame = tk.Frame(deck_builder_frame, bg="white", bd=2, relief=tk.GROOVE)
+        category_frame.pack(pady=10, padx=10, fill=tk.X)
+        
+        lb = tk.Label(category_frame, text=section)
         lb.pack(padx=10, pady=10)        
         for i in range(4):
-            row_frame = tk.Frame(deck_builder_frame)
+            row_frame = tk.Frame(category_frame, bg="white")
             row_frame.pack()
             for j in range(13):
                 try:
