@@ -205,12 +205,6 @@ def categories_page():
 
     categories_frame.pack()
 
-<<<<<<< HEAD
-
-def avg_elixir_cal_page():
-    avg_elixir_cal_frame = tk.Frame(main_frame)
-    lb = tk.Label(avg_elixir_cal_frame , text= 'Average Elixir Calculator', font=('Showcard Gothic', 15, 'bold'))
-=======
 def show_image(event, img):
     image_window = tk.Toplevel()
     image_window.title("Card Image")
@@ -223,7 +217,6 @@ def avg_elixir_cal_page():
     avg_elixir_cal_frame = ScrolledFrame(main_frame, autohide=True)
     avg_elixir_cal_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
     lb = tk.Label(avg_elixir_cal_frame , text= 'Average Elixir Calculator')
->>>>>>> main
     lb.place(x=20 , y = 10)
     lb.pack(padx=10 ,pady=20)
     
