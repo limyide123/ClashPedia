@@ -171,35 +171,62 @@ def welcome_page():
 
     welcome_frame.pack()
     
-def categories_page():
+def categories_page(gg='default'):
+    delete_page()
+    
+    # Frame for sorting buttons
+    button_frame = tk.Frame(main_frame)
+    button_frame.pack(fill=X, padx=10, pady=5)
+    
+    def refresh_categories(gg):
+        categories_page(gg)
+    
+    type_button = ttk.Button(button_frame, text='Type', command=lambda: refresh_categories('type'))
+    type_button.pack(side=LEFT, padx=5)
+
+    arena_button = ttk.Button(button_frame, text='Arena', command=lambda: refresh_categories('arena'))
+    arena_button.pack(side=LEFT, padx=5)
+
+    elixir_button = ttk.Button(button_frame, text='Elixir', command=lambda: refresh_categories('elixir'))
+    elixir_button.pack(side=LEFT, padx=5)
+
+    rarity_button = ttk.Button(button_frame, text='Rarity', command=lambda: refresh_categories('rarity'))
+    rarity_button.pack(side=LEFT, padx=5)
+
     categories_frame = ScrolledFrame(main_frame)
     categories_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
-    lb = tk.Label(categories_frame, text= 'Categories')
+
+    lb = tk.Label(categories_frame, text='Categories')
     lb.grid(row=0, column=0, columnspan=13, padx=10, pady=20)
 
     categories_folder = "clash-royale-card-elixir"
     categories = [("Common", "common"), ("Rare", "rare"), ("Epic", "epic"), ("Legendary", "legendary"), ("Champion", "champion"), ("Funny", "funny")]
+    
+    if gg == 'type':
+        categories.sort(key=lambda x: x[0])
+    elif gg == 'arena':
+        pass
+    elif gg == 'elixir':
+        pass
+    elif gg == 'rarity':
+        categories = sorted(categories, key=lambda x: ['common', 'rare', 'epic', 'legendary', 'champion', 'funny'].index(x[1]))
 
     for i, (section, category) in enumerate(categories):
-
-        category_frame = tk.Frame(categories_frame, bg="white", bd=2, relief=tk.GROOVE)
-        category_frame.grid(row=i*5, column=0, columnspan=13, padx=10, pady=10, sticky='ew')
-
-        lb = tk.Label(category_frame, text=section, font=('Showcard Gothic', 15, 'bold'))
-        lb.grid(row=0, column=0, columnspan=13, padx=10, pady=10, sticky='ew')
+        lb = tk.Label(categories_frame, text=section)
+        lb.grid(row=i * 5, column=0, columnspan=13, padx=10, pady=10, sticky='ew')
 
         category_folder = os.path.join(categories_folder, category)
         for j in range(4):
             for k in range(13):
-                filename = f"card_{j*13+k+1}.png"
+                filename = f"card_{j * 13 + k + 1}.png"
                 image_path = os.path.join(category_folder, filename)
                 if os.path.exists(image_path):
                     img = Image.open(image_path)
                     img = img.resize((90, 120), Image.LANCZOS)
                     img = ImageTk.PhotoImage(img)
-                    panel = tk.Label(category_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
+                    panel = tk.Label(categories_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
                     panel.image = img
-                    panel.grid(row=j+1, column=k, padx=5, pady=5)
+                    panel.grid(row=i * 5 + 1 + j, column=k, padx=5, pady=5)
 
                     panel.bind("<Button>", lambda e, img=img: show_image(e, img))
 
@@ -212,6 +239,8 @@ def show_image(event, img):
     image_window.transient(window)
     image_window.grab_set()
 
+    image_window.config(bd=2, relief="groove")
+
     image_label = tk.Label(image_window, image=img)
     image_label.pack(padx=100, pady=100)
 
@@ -219,8 +248,9 @@ def show_image(event, img):
     image_window.columnconfigure(0, weight=1)
     image_label.config(width=image_window.winfo_screenwidth()*2, height=image_window.winfo_screenheight()*2)
     image_label.pack_forget()
-    image_label.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-    image_label.bind("<Configure>", lambda e: image_label.config(width=e.width*2, height=e.height*2))
+    image_label.pack(padx=100, pady=100)
+
+    image_window.mainloop()
 
 def avg_elixir_cal_page():
     avg_elixir_cal_frame = ScrolledFrame(main_frame, autohide=True)
