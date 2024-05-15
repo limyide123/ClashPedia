@@ -11,7 +11,7 @@ from ttkbootstrap.scrolled import ScrolledFrame
 import os
 from tkinter import PhotoImage
 import csv
-
+import tkinter.messagebox as messagebox
 
 window = ttk.Window(themename='solar')
 window.title("ClashPedia")
@@ -384,7 +384,7 @@ def profile_maker_page():
     profile_maker_frame = ScrolledFrame(main_frame, padding=5, height=10, autohide=True)
     profile_maker_frame.pack(fill=BOTH, expand=YES)
 
-    title_label = tk.Label(profile_maker_frame, text="Profile Maker", font=('Showcard Gothic', 25, 'bold'))
+    title_label = tk.Label(profile_maker_frame, text="Profile Maker", font=('Showcard Gothic', 23, 'bold'))
     title_label.pack(pady=10)
 
     form_frame = tk.Frame(profile_maker_frame)
@@ -448,6 +448,7 @@ def profile_maker_page():
     save_button = tk.Button(form_frame, text="Save", command=lambda: save_card_to_file(
         name_entry.get(),
         elixir_entry.get(),
+        type_entry.get(),
         description_text.get("1.0", tk.END),
         hitpoints_entry.get(),
         damage_entry.get(),
@@ -480,7 +481,7 @@ def save_card_to_file(name, elixir, card_type, description, hitpoints, damage, c
 
     card_data = [name, elixir, card_type, description.strip(), hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius]
 
-    with open('card_data.txt', 'a', newline='') as file:
+    with open('cards.txt', 'a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(card_data)
     
