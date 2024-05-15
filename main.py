@@ -483,6 +483,7 @@ def profile_maker_page():
     save_button = tk.Button(form_frame, text="Save", command=lambda: save_card_to_file(
         name_entry.get(),
         elixir_entry.get(),
+        type_entry.get(),
         description_text.get("1.0", tk.END),
         hitpoints_entry.get(),
         damage_entry.get(),
