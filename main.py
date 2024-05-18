@@ -9,6 +9,60 @@ from PIL import Image, ImageTk
 from ttkbootstrap.scrolled import ScrolledFrame
 import os
 from tkinter import PhotoImage
+import sqlite3
+
+def setup_database():
+    conn = sqlite3.connect('clash_royale.db')
+    cursor = conn.cursor()
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        directory TEXT NOT NULL
+    )
+    ''')
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS images (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        category_id INTEGER,
+        filename TEXT,
+        FOREIGN KEY (category_id) REFERENCES categories (id)
+    )
+    ''')
+
+    categories = [
+        ('Common', 'common'),
+        ('Rare', 'rare'),
+        ('Epic', 'epic'),
+        ('Legendary', 'legendary'),
+        ('Champion', 'champion'),
+        ('Funny', 'funny')
+    ]
+
+    # Insert categories if not already in the database
+    for category_name, directory in categories:
+        cursor.execute('SELECT id FROM categories WHERE name = ?', (category_name,))
+        category_id = cursor.fetchone()
+        if not category_id:
+            cursor.execute('INSERT INTO categories (name, directory) VALUES (?, ?)', (category_name, directory))
+            category_id = cursor.lastrowid
+        else:
+            category_id = category_id[0]
+
+        image_dir = os.path.join("clash-royale-card-elixir", directory)
+        for filename in os.listdir(image_dir):
+            if filename.endswith('.png'):
+                cursor.execute('SELECT id FROM images WHERE category_id = ? AND filename = ?', (category_id, filename))
+                if not cursor.fetchone():
+                    cursor.execute('INSERT INTO images (category_id, filename) VALUES (?, ?)', (category_id, filename))
+
+    conn.commit()
+    conn.close()
+
+# Run the setup database function
+setup_database()
 
 window = ttk.Window(themename='solar')
 window.title("ClashPedia")
@@ -172,10 +226,10 @@ def welcome_page():
 
     welcome_frame.pack()
     
-def categories_page(gg='default'):
-    delete_page()
-    
-    # Frame for sorting buttons
+def categories_page():
+    categories_frame = ScrolledFrame(main_frame)
+    categories_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+
     button_frame = tk.Frame(main_frame)
     button_frame.pack(fill=X, padx=10, pady=5)
     
@@ -194,64 +248,70 @@ def categories_page(gg='default'):
     rarity_button = ttk.Button(button_frame, text='Rarity', command=lambda: refresh_categories('rarity'))
     rarity_button.pack(side=LEFT, padx=5)
 
-    categories_frame = ScrolledFrame(main_frame)
-    categories_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+    conn = sqlite3.connect('clash_royale.db')
+    cursor = conn.cursor()
 
-    lb = tk.Label(categories_frame, text='Categories')
-    lb.grid(row=0, column=0, columnspan=13, padx=10, pady=20)
+    cursor.execute('SELECT id, name, directory FROM categories')
+    categories = cursor.fetchall()
 
-    categories_folder = "clash-royale-card-elixir"
-    categories = [("Common", "common"), ("Rare", "rare"), ("Epic", "epic"), ("Legendary", "legendary"), ("Champion", "champion"), ("Funny", "funny")]
-    
-    if gg == 'type':
-        categories.sort(key=lambda x: x[0])
-    elif gg == 'arena':
-        pass
-    elif gg == 'elixir':
-        pass
-    elif gg == 'rarity':
-        categories = sorted(categories, key=lambda x: ['common', 'rare', 'epic', 'legendary', 'champion', 'funny'].index(x[1]))
+    displayed_titles = set()
+    displayed_images = set()
 
-    for i, (section, category) in enumerate(categories):
-        lb = tk.Label(categories_frame, text=section)
-        lb.grid(row=i * 5, column=0, columnspan=13, padx=10, pady=10, sticky='ew')
+    row_counter = 0
 
-        category_folder = os.path.join(categories_folder, category)
-        for j in range(4):
-            for k in range(13):
-                filename = f"card_{j * 13 + k + 1}.png"
-                image_path = os.path.join(category_folder, filename)
-                if os.path.exists(image_path):
-                    img = Image.open(image_path)
-                    img = img.resize((90, 120), Image.LANCZOS)
-                    img = ImageTk.PhotoImage(img)
-                    panel = tk.Label(categories_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
-                    panel.image = img
-                    panel.grid(row=i * 5 + 1 + j, column=k, padx=5, pady=5)
+    for category_id, category_name, category_directory in categories:
+        if category_name not in displayed_titles:
+            displayed_titles.add(category_name)
 
-                    panel.bind("<Button>", lambda e, img=img: show_image(e, img))
+            category_frame = tk.Frame(categories_frame)
+            category_frame.grid(row=row_counter, column=0, columnspan=13, padx=10, pady=10, sticky='ew')
+
+            title_label = tk.Label(category_frame, text=category_name, font=('Helvetica', 16, 'bold'))
+            title_label.grid(row=0, column=0, columnspan=13, padx=10, pady=10, sticky='ew')
+
+            row_counter += 1
+            col_counter = 0
+
+        cursor.execute('SELECT filename FROM images WHERE category_id =?', (category_id,))
+        images = cursor.fetchall()
+
+        for filename in images:
+            image_path = os.path.join("clash-royale-card-elixir", category_directory, filename[0])
+
+            if image_path not in displayed_images and os.path.exists(image_path):
+                displayed_images.add(image_path)
+
+                img = Image.open(image_path)
+                img = img.resize((90, 120), Image.LANCZOS)
+                img = ImageTk.PhotoImage(img)
+
+                panel = tk.Label(category_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
+                panel.image = img
+                panel.grid(row=row_counter, column=col_counter, padx=5, pady=5)
+
+                panel.bind("<Button>", lambda e, img=image_path, category_id=category_id: show_image(e, img, category_id))
+
+                col_counter += 1
+                if col_counter == 13:
+                    col_counter = 0
+                    row_counter += 1
+
+    conn.close()
 
     categories_frame.pack()
 
-def show_image(event, img):
-    image_window = tk.Toplevel(window)
+def show_image(event, image_path):
+    image_window = tk.Toplevel()
     image_window.title("Card Image")
-    image_window.geometry("600x800")
-    image_window.transient(window)
-    image_window.grab_set()
+    image_window.geometry("300x400")
 
-    image_window.config(bd=2, relief="groove")
+    img = Image.open(image_path)
+    img = img.resize((300, 400), Image.LANCZOS)
+    img = ImageTk.PhotoImage(img)
 
     image_label = tk.Label(image_window, image=img)
-    image_label.pack(padx=100, pady=100)
-
-    image_window.rowconfigure(0, weight=1)
-    image_window.columnconfigure(0, weight=1)
-    image_label.config(width=image_window.winfo_screenwidth()*2, height=image_window.winfo_screenheight()*2)
-    image_label.pack_forget()
-    image_label.pack(padx=100, pady=100)
-
-    image_window.mainloop()
+    image_label.image = img
+    image_label.pack(padx=20, pady=20)
 
 def avg_elixir_cal_page():
     avg_elixir_cal_frame = ScrolledFrame(main_frame, autohide=True)
