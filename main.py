@@ -226,6 +226,25 @@ def welcome_page():
 def categories_page():
     categories_frame = ScrolledFrame(main_frame)
     categories_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+
+    button_frame = tk.Frame(main_frame)
+    button_frame.pack(fill=X, padx=10, pady=5)
+    
+    def refresh_categories(gg):
+        categories_page(gg)
+    
+    type_button = ttk.Button(button_frame, text='Type', command=lambda: refresh_categories('type'))
+    type_button.pack(side=LEFT, padx=5)
+
+    arena_button = ttk.Button(button_frame, text='Arena', command=lambda: refresh_categories('arena'))
+    arena_button.pack(side=LEFT, padx=5)
+
+    elixir_button = ttk.Button(button_frame, text='Elixir', command=lambda: refresh_categories('elixir'))
+    elixir_button.pack(side=LEFT, padx=5)
+
+    rarity_button = ttk.Button(button_frame, text='Rarity', command=lambda: refresh_categories('rarity'))
+    rarity_button.pack(side=LEFT, padx=5)
+
     conn = sqlite3.connect('clash_royale.db')
     cursor = conn.cursor()
 
