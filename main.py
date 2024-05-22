@@ -361,7 +361,7 @@ category_counts = {
 def on_checkbutton_click(var, panel, min_val, max_val, category):
     global num_selected
     if var.get():
-        # Check if total selected cards exceed 8
+        
         if num_selected >= 8:
             messagebox.showwarning("Limit Exceeded", "You can only select up to 8 cards.")
             var.set(False)
