@@ -41,7 +41,6 @@ def setup_database():
         ('Funny', 'funny')
     ]
 
-    # Insert categories if not already in the database
     for category_name, directory in categories:
         cursor.execute('SELECT id FROM categories WHERE name = ?', (category_name,))
         category_id = cursor.fetchone()
@@ -61,7 +60,6 @@ def setup_database():
     conn.commit()
     conn.close()
 
-# Run the setup database function
 setup_database()
 
 window = ttk.Window(themename='solar')
@@ -288,7 +286,7 @@ def categories_page():
                 panel.image = img
                 panel.grid(row=row_counter, column=col_counter, padx=5, pady=5)
 
-                panel.bind("<Button>", lambda e, img=image_path, category_id=category_id: show_image(e, img, category_id))
+                panel.bind("<Button>", lambda e, img=image_path: show_image(e, img))
 
                 col_counter += 1
                 if col_counter == 13:
@@ -473,6 +471,91 @@ def profile_maker_page():
 def save_card_to_file(name, elixir, card_type, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius):
     pass
 
+def profile_maker_page():
+    profile_maker_frame = ScrolledFrame(main_frame, padding=5, height=10, autohide=True)
+    profile_maker_frame.pack(fill=BOTH, expand=YES)
+
+    title_label = tk.Label(profile_maker_frame, text="Profile Maker", font=('Showcard Gothic', 25, 'bold'))
+    title_label.pack(pady=10)
+
+    form_frame = tk.Frame(profile_maker_frame)
+    form_frame.pack(pady=10, padx=10)
+
+    name_label = tk.Label(form_frame, text="Card Name:")
+    name_label.grid(row=0, column=0, padx=5, pady=5)
+    name_entry = tk.Entry(form_frame)
+    name_entry.grid(row=0, column=1, padx=5, pady=5)
+
+    elixir_label = tk.Label(form_frame, text="Elixir Cost:")
+    elixir_label.grid(row=1, column=0, padx=5, pady=5)
+    elixir_entry = tk.Entry(form_frame)
+    elixir_entry.grid(row=1, column=1, padx=5, pady=5)
+
+    type_label = tk.Label(form_frame, text="Card Type:")
+    type_label.grid(row=2, column=0, padx=5, pady=5)
+    type_entry = tk.Entry(form_frame)
+    type_entry.grid(row=2, column=1, padx=5, pady=5)
+
+    description_label = tk.Label(form_frame, text="Description:")
+    description_label.grid(row=3, column=0, padx=5, pady=5)
+    description_text = tk.Text(form_frame, height=5, width=40)
+    description_text.grid(row=3, column=1, padx=5, pady=5)
+
+    hitpoints_label = tk.Label(form_frame, text="Hitpoints:")
+    hitpoints_label.grid(row=4, column=0, padx=5, pady=5)
+    hitpoints_entry = tk.Entry(form_frame)
+    hitpoints_entry.grid(row=4, column=1, padx=5, pady=5)
+
+    damage_label = tk.Label(form_frame, text="Damage:")
+    damage_label.grid(row=5, column=0, padx=5, pady=5)
+    damage_entry = tk.Entry(form_frame)
+    damage_entry.grid(row=5, column=1, padx=5, pady=5)
+
+    range_label = tk.Label(form_frame, text="Range:")
+    range_label.grid(row=6, column=0, padx=5, pady=5)
+    range_entry = tk.Entry(form_frame)
+    range_entry.grid(row=6, column=1, padx=5, pady=5)
+
+    stun_duration_label = tk.Label(form_frame, text="Stun Duration:")
+    stun_duration_label.grid(row=7, column=0, padx=5, pady=5)
+    stun_duration_entry = tk.Entry(form_frame)
+    stun_duration_entry.grid(row=7, column=1, padx=5, pady=5)
+
+    shield_label = tk.Label(form_frame, text="Shield:")
+    shield_label.grid(row=8, column=0, padx=5, pady=5)
+    shield_entry = tk.Entry(form_frame)
+    shield_entry.grid(row=8, column=1, padx=5, pady=5)
+
+    movement_speed_label = tk.Label(form_frame, text="Movement Speed:")
+    movement_speed_label.grid(row=9, column=0, padx=5, pady=5)
+    movement_speed_entry = tk.Entry(form_frame)
+    movement_speed_entry.grid(row=9, column=1, padx=5, pady=5)
+
+    radius_label = tk.Label(form_frame, text="Radius:")
+    radius_label.grid(row=10, column=0, padx=5, pady=5)
+    radius_entry = tk.Entry(form_frame)
+    radius_entry.grid(row=10, column=1, padx=5, pady=5)
+
+    save_button = tk.Button(form_frame, text="Save", command=lambda: save_card_to_file(
+        name_entry.get(),
+        elixir_entry.get(),
+        type_entry.get(),
+        description_text.get("1.0", tk.END),
+        hitpoints_entry.get(),
+        damage_entry.get(),
+        range_entry.get(),
+        stun_duration_entry.get(),
+        shield_entry.get(),
+        movement_speed_entry.get(),
+        radius_entry.get()
+    ))
+    save_button.grid(row=11, column=0, columnspan=2, pady=10)
+
+    profile_maker_frame.pack()
+
+def save_card_to_file(name, elixir, card_type, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius):
+    pass
+
 welcome_button = ttk.Button(options_frame , text= 'Welcome' , command=lambda:switch_page(welcome_switch_page,welcome_page))
 welcome_button.place(x=20 , y= 20, width=130)
 welcome_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
@@ -492,5 +575,6 @@ profile_maker_button = ttk.Button(options_frame, text='Profile Maker', command=l
 profile_maker_button.place(x=20, y=200, width=130, height=40)
 profile_maker_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
 profile_maker_switch_page.place(x=3, y=200, width=5, height=40)
+
 
 window.mainloop()
