@@ -9,7 +9,58 @@ from PIL import Image, ImageTk
 from ttkbootstrap.scrolled import ScrolledFrame
 import os
 from tkinter import PhotoImage
-import csv
+import sqlite3
+
+def setup_database():
+    conn = sqlite3.connect('clash_royale.db')
+    cursor = conn.cursor()
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        directory TEXT NOT NULL
+    )
+    ''')
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS images (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        category_id INTEGER,
+        filename TEXT,
+        FOREIGN KEY (category_id) REFERENCES categories (id)
+    )
+    ''')
+
+    categories = [
+        ('Common', 'common'),
+        ('Rare', 'rare'),
+        ('Epic', 'epic'),
+        ('Legendary', 'legendary'),
+        ('Champion', 'champion'),
+        ('Funny', 'funny')
+    ]
+
+    for category_name, directory in categories:
+        cursor.execute('SELECT id FROM categories WHERE name = ?', (category_name,))
+        category_id = cursor.fetchone()
+        if not category_id:
+            cursor.execute('INSERT INTO categories (name, directory) VALUES (?, ?)', (category_name, directory))
+            category_id = cursor.lastrowid
+        else:
+            category_id = category_id[0]
+
+        image_dir = os.path.join("clash-royale-card-elixir", directory)
+        for filename in os.listdir(image_dir):
+            if filename.endswith('.png'):
+                cursor.execute('SELECT id FROM images WHERE category_id = ? AND filename = ?', (category_id, filename))
+                if not cursor.fetchone():
+                    cursor.execute('INSERT INTO images (category_id, filename) VALUES (?, ?)', (category_id, filename))
+
+    conn.commit()
+    conn.close()
+
+setup_database()
 
 window = ttk.Window(themename='solar')
 window.title("ClashPedia")
@@ -47,7 +98,6 @@ logo_label.place(x=10, y=20)
 def hide_switch_page():
     welcome_switch_page.config(bg='#c3c3c3')
     categories_switch_page.config(bg='#c3c3c3')
-    avg_elixir_cal_switch_page.config(bg='#c3c3c3')
     deck_builder_switch_page.config(bg='#c3c3c3')
     profile_maker_switch_page.config(bg='#c3c3c3')
 
@@ -173,10 +223,10 @@ def welcome_page():
 
     welcome_frame.pack()
     
-def categories_page(gg='default'):
-    delete_page()
-    
-    # Frame for sorting buttons
+def categories_page():
+    categories_frame = ScrolledFrame(main_frame)
+    categories_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+
     button_frame = tk.Frame(main_frame)
     button_frame.pack(fill=X, padx=10, pady=5)
     
@@ -195,150 +245,70 @@ def categories_page(gg='default'):
     rarity_button = ttk.Button(button_frame, text='Rarity', command=lambda: refresh_categories('rarity'))
     rarity_button.pack(side=LEFT, padx=5)
 
-    categories_frame = ScrolledFrame(main_frame)
-    categories_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+    conn = sqlite3.connect('clash_royale.db')
+    cursor = conn.cursor()
 
-    lb = tk.Label(categories_frame, text='Categories')
-    lb.grid(row=0, column=0, columnspan=13, padx=10, pady=20)
+    cursor.execute('SELECT id, name, directory FROM categories')
+    categories = cursor.fetchall()
 
-    categories_folder = "clash-royale-card-elixir"
-    categories = [("Common", "common"), ("Rare", "rare"), ("Epic", "epic"), ("Legendary", "legendary"), ("Champion", "champion"), ("Funny", "funny")]
-    
-    if gg == 'type':
-        categories.sort(key=lambda x: x[0])
-    elif gg == 'arena':
-        pass
-    elif gg == 'elixir':
-        pass
-    elif gg == 'rarity':
-        categories = sorted(categories, key=lambda x: ['common', 'rare', 'epic', 'legendary', 'champion', 'funny'].index(x[1]))
+    displayed_titles = set()
+    displayed_images = set()
 
-    for i, (section, category) in enumerate(categories):
-        lb = tk.Label(categories_frame, text=section)
-        lb.grid(row=i * 5, column=0, columnspan=13, padx=10, pady=10, sticky='ew')
+    row_counter = 0
 
-        category_folder = os.path.join(categories_folder, category)
-        for j in range(4):
-            for k in range(13):
-                filename = f"card_{j * 13 + k + 1}.png"
-                image_path = os.path.join(category_folder, filename)
-                if os.path.exists(image_path):
-                    img = Image.open(image_path)
-                    img = img.resize((90, 120), Image.LANCZOS)
-                    img = ImageTk.PhotoImage(img)
-                    panel = tk.Label(categories_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
-                    panel.image = img
-                    panel.grid(row=i * 5 + 1 + j, column=k, padx=5, pady=5)
+    for category_id, category_name, category_directory in categories:
+        if category_name not in displayed_titles:
+            displayed_titles.add(category_name)
 
-                    panel.bind("<Button>", lambda e, img=img: show_image(e, img))
+            category_frame = tk.Frame(categories_frame)
+            category_frame.grid(row=row_counter, column=0, columnspan=13, padx=10, pady=10, sticky='ew')
+
+            title_label = tk.Label(category_frame, text=category_name, font=('Helvetica', 16, 'bold'))
+            title_label.grid(row=0, column=0, columnspan=13, padx=10, pady=10, sticky='ew')
+
+            row_counter += 1
+            col_counter = 0
+
+        cursor.execute('SELECT filename FROM images WHERE category_id =?', (category_id,))
+        images = cursor.fetchall()
+
+        for filename in images:
+            image_path = os.path.join("clash-royale-card-elixir", category_directory, filename[0])
+
+            if image_path not in displayed_images and os.path.exists(image_path):
+                displayed_images.add(image_path)
+
+                img = Image.open(image_path)
+                img = img.resize((90, 120), Image.LANCZOS)
+                img = ImageTk.PhotoImage(img)
+
+                panel = tk.Label(category_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
+                panel.image = img
+                panel.grid(row=row_counter, column=col_counter, padx=5, pady=5)
+
+                panel.bind("<Button>", lambda e, img=image_path: show_image(e, img))
+
+                col_counter += 1
+                if col_counter == 13:
+                    col_counter = 0
+                    row_counter += 1
+
+    conn.close()
 
     categories_frame.pack()
 
-def show_image(event, img):
-    image_window = tk.Toplevel(window)
+def show_image(event, image_path):
+    image_window = tk.Toplevel()
     image_window.title("Card Image")
-    image_window.geometry("600x800")
-    image_window.transient(window)
-    image_window.grab_set()
+    image_window.geometry("300x400")
 
-    image_window.config(bd=2, relief="groove")
+    img = Image.open(image_path)
+    img = img.resize((300, 400), Image.LANCZOS)
+    img = ImageTk.PhotoImage(img)
 
     image_label = tk.Label(image_window, image=img)
-    image_label.pack(padx=100, pady=100)
-
-    image_window.rowconfigure(0, weight=1)
-    image_window.columnconfigure(0, weight=1)
-    image_label.config(width=image_window.winfo_screenwidth()*2, height=image_window.winfo_screenheight()*2)
-    image_label.pack_forget()
-    image_label.pack(padx=100, pady=100)
-
-    image_window.mainloop()
-
-def avg_elixir_cal_page():
-    avg_elixir_cal_frame = ScrolledFrame(main_frame, autohide=True)
-    avg_elixir_cal_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
-    lb = tk.Label(avg_elixir_cal_frame , text= 'Average Elixir Calculator', font=('Showcard Gothic', 20, 'bold'))
-    lb.place(x=20 , y = 10)
-    lb.pack(padx=10 ,pady=20)
-    
-    categories = [("Elixir 1", "Elixir_1", 1), ("Elixir 2", "Elixir_2", 2), ("Elixir 3", "Elixir_3", 3), ("Elixir 4", "Elixir_4", 4), ("Elixir 5", "Elixir_5", 5), ("Elixir 6", "Elixir_6", 6), ("Elixir 7", "Elixir_7", 7), ("Elixir 8", "Elixir_8", 8), ("Elixir 9", "Elixir_9", 9)]
-
-    for section, category, value in categories:
-        lb = tk.Label(avg_elixir_cal_frame, text=section, font=('Rockwell Extra Bold', 15, 'bold'))
-        lb.pack(padx=10, pady=10)        
-        for i in range(3):
-            row_frame = tk.Frame(avg_elixir_cal_frame)
-            row_frame.pack()
-            for j in range(11):
-                try:
-                    image_path = f"average_elixir_calculator_images/{category}/card_{i*11 + j + 1}.png"
-                    img = Image.open(image_path)
-                    img = img.resize((90, 120), Image.LANCZOS)
-                    img = ImageTk.PhotoImage(img)
-                    panel = tk.Label(row_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
-                    panel.image = img
-                    panel.pack(side=tk.LEFT)
-
-                    var = tk.BooleanVar()
-                    checkbutton = ttk.Checkbutton(row_frame, variable=var, command=lambda v=var, p=panel, val = value, cat=category: elixir_checkbutton_click(v, p, val, cat))
-                    checkbutton.pack(side=tk.LEFT, padx=5, pady=5)
-
-                except FileNotFoundError:
-                    break
-
-    results_btn = tk.Button(avg_elixir_cal_frame, text="Results", command=cal_results)
-    results_btn.pack(padx=10, pady=10)
-    avg_elixir_cal_frame.pack()
-
-elixir_num_selected = 0
-
-elixir_category_counts={
-    "Elixir_1":0,
-    "Elixir_2":0,
-    "Elixir_3":0,
-    "Elixir_4":0,
-    "Elixir_5":0,
-    "Elixir_6":0,
-    "Elixir_7":0,
-    "Elixir_8":0,
-    "Elixir_9":0
-}
-
-def elixir_checkbutton_click(var, panel, val, category):
-    global elixir_num_selected
-    if var.get():
-        # Check if total selected cards exceed 8
-        if elixir_num_selected >= 8:
-            messagebox.showwarning("Limit Exceeded", "You can only select up to 8 cards.")
-            var.set(False)
-            return
-        elixir_category_counts[category] += val
-        elixir_num_selected += 1
-        panel.config(state='normal')
-    else:
-        elixir_category_counts[category] -= val
-        elixir_num_selected -= 1
-        panel.config(state='normal')
-
-def cal_results():
-    total_elixir = sum(elixir_category_counts.values())
-    average_elixir = total_elixir / 8  # Assuming the user selects exactly 8 cards
-
-    feedback = ""
-    if 0.1 <= average_elixir <= 2.0:
-        feedback = "You're a fast cycle guy"
-    elif 2.1 <= average_elixir <= 3.2:
-        feedback = "You're either using 2.6 hog or 2.9 mortar"
-    elif 3.3 <= average_elixir <= 4.1:
-        feedback = "You're not dependent on cycle decks now"
-    elif 4.2 <= average_elixir <= 4.7:
-        feedback = "Woah, that's a bit too expensive"
-    elif 4.8 <= average_elixir <= 5.6:
-        feedback = "Are you trolling at this point?"
-    else:
-        feedback = "I'm certain you're playing 7x elixir"
-
-    messagebox.showinfo("Average Elixir and Feedback", f"Average Elixir: {average_elixir:.2f}\nFeedback: {feedback}")
+    image_label.image = img
+    image_label.pack(padx=20, pady=20)
 
 def deck_builder_page():
     deck_builder_frame = ScrolledFrame(main_frame, autohide=True)
@@ -522,6 +492,91 @@ def save_card_to_file(name, elixir, card_type, description, hitpoints, damage, c
     
     messagebox.showinfo("Success", "Card saved successfully.")
 
+def profile_maker_page():
+    profile_maker_frame = ScrolledFrame(main_frame, padding=5, height=10, autohide=True)
+    profile_maker_frame.pack(fill=BOTH, expand=YES)
+
+    title_label = tk.Label(profile_maker_frame, text="Profile Maker", font=('Showcard Gothic', 25, 'bold'))
+    title_label.pack(pady=10)
+
+    form_frame = tk.Frame(profile_maker_frame)
+    form_frame.pack(pady=10, padx=10)
+
+    name_label = tk.Label(form_frame, text="Card Name:")
+    name_label.grid(row=0, column=0, padx=5, pady=5)
+    name_entry = tk.Entry(form_frame)
+    name_entry.grid(row=0, column=1, padx=5, pady=5)
+
+    elixir_label = tk.Label(form_frame, text="Elixir Cost:")
+    elixir_label.grid(row=1, column=0, padx=5, pady=5)
+    elixir_entry = tk.Entry(form_frame)
+    elixir_entry.grid(row=1, column=1, padx=5, pady=5)
+
+    type_label = tk.Label(form_frame, text="Card Type:")
+    type_label.grid(row=2, column=0, padx=5, pady=5)
+    type_entry = tk.Entry(form_frame)
+    type_entry.grid(row=2, column=1, padx=5, pady=5)
+
+    description_label = tk.Label(form_frame, text="Description:")
+    description_label.grid(row=3, column=0, padx=5, pady=5)
+    description_text = tk.Text(form_frame, height=5, width=40)
+    description_text.grid(row=3, column=1, padx=5, pady=5)
+
+    hitpoints_label = tk.Label(form_frame, text="Hitpoints:")
+    hitpoints_label.grid(row=4, column=0, padx=5, pady=5)
+    hitpoints_entry = tk.Entry(form_frame)
+    hitpoints_entry.grid(row=4, column=1, padx=5, pady=5)
+
+    damage_label = tk.Label(form_frame, text="Damage:")
+    damage_label.grid(row=5, column=0, padx=5, pady=5)
+    damage_entry = tk.Entry(form_frame)
+    damage_entry.grid(row=5, column=1, padx=5, pady=5)
+
+    range_label = tk.Label(form_frame, text="Range:")
+    range_label.grid(row=6, column=0, padx=5, pady=5)
+    range_entry = tk.Entry(form_frame)
+    range_entry.grid(row=6, column=1, padx=5, pady=5)
+
+    stun_duration_label = tk.Label(form_frame, text="Stun Duration:")
+    stun_duration_label.grid(row=7, column=0, padx=5, pady=5)
+    stun_duration_entry = tk.Entry(form_frame)
+    stun_duration_entry.grid(row=7, column=1, padx=5, pady=5)
+
+    shield_label = tk.Label(form_frame, text="Shield:")
+    shield_label.grid(row=8, column=0, padx=5, pady=5)
+    shield_entry = tk.Entry(form_frame)
+    shield_entry.grid(row=8, column=1, padx=5, pady=5)
+
+    movement_speed_label = tk.Label(form_frame, text="Movement Speed:")
+    movement_speed_label.grid(row=9, column=0, padx=5, pady=5)
+    movement_speed_entry = tk.Entry(form_frame)
+    movement_speed_entry.grid(row=9, column=1, padx=5, pady=5)
+
+    radius_label = tk.Label(form_frame, text="Radius:")
+    radius_label.grid(row=10, column=0, padx=5, pady=5)
+    radius_entry = tk.Entry(form_frame)
+    radius_entry.grid(row=10, column=1, padx=5, pady=5)
+
+    save_button = tk.Button(form_frame, text="Save", command=lambda: save_card_to_file(
+        name_entry.get(),
+        elixir_entry.get(),
+        type_entry.get(),
+        description_text.get("1.0", tk.END),
+        hitpoints_entry.get(),
+        damage_entry.get(),
+        range_entry.get(),
+        stun_duration_entry.get(),
+        shield_entry.get(),
+        movement_speed_entry.get(),
+        radius_entry.get()
+    ))
+    save_button.grid(row=11, column=0, columnspan=2, pady=10)
+
+    profile_maker_frame.pack()
+
+def save_card_to_file(name, elixir, card_type, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius):
+    pass
+
 welcome_button = ttk.Button(options_frame , text= 'Welcome' , command=lambda:switch_page(welcome_switch_page,welcome_page))
 welcome_button.place(x=20 , y= 20, width=130)
 welcome_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
@@ -532,19 +587,15 @@ categories_button.place(x=20 , y= 80, width=130)
 categories_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
 categories_switch_page.place(x=3, y=80, width=5, height =40)
 
-avg_elixir_cal_button = ttk.Button(options_frame , text= 'Average Elixir\nCalculator' , command=lambda:switch_page(avg_elixir_cal_switch_page,avg_elixir_cal_page))
-avg_elixir_cal_button.place(x=20 , y= 140, width=130, height=60)
-avg_elixir_cal_switch_page = tk.Label(options_frame, bg='#c3c3c3')
-avg_elixir_cal_switch_page.place(x=3, y=140, width=5, height =60)
-
 deck_builder_button = ttk.Button(options_frame , text= 'Deck Builder' , command=lambda:switch_page(deck_builder_switch_page,deck_builder_page))
-deck_builder_button.place(x=20 , y= 220, width=130, height=40)
+deck_builder_button.place(x=20 , y= 140, width=130, height=40)
 deck_builder_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
-deck_builder_switch_page.place(x=3, y=220, width=5, height =40)
+deck_builder_switch_page.place(x=3, y=140, width=5, height =40)
 
 profile_maker_button = ttk.Button(options_frame, text='Profile Maker', command=lambda: switch_page(profile_maker_switch_page, profile_maker_page))
-profile_maker_button.place(x=20, y=280, width=130, height=40)
+profile_maker_button.place(x=20, y=200, width=130, height=40)
 profile_maker_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
-profile_maker_switch_page.place(x=3, y=280, width=5, height=40)
+profile_maker_switch_page.place(x=3, y=200, width=5, height=40)
+
 
 window.mainloop()
