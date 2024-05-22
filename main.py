@@ -10,6 +10,7 @@ from ttkbootstrap.scrolled import ScrolledFrame
 import os
 from tkinter import PhotoImage
 import sqlite3
+import csv
 
 def setup_database():
     conn = sqlite3.connect('clash_royale.db')
@@ -574,8 +575,33 @@ def profile_maker_page():
 
     profile_maker_frame.pack()
 
-def save_card_to_file(name, elixir, card_type, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius):
-    pass
+def save_card(name, elixir, card_type, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius):
+    if not name or not elixir or not card_type or not description:
+        messagebox.showwarning("Input Error", "Name, Elixir, Type, and Description are required fields.")
+        return
+
+    try:
+        elixir = int(elixir)
+        hitpoints = int(hitpoints)
+        damage = int(damage)
+        card_range = int(card_range)
+        stun_duration = float(stun_duration)
+        radius = float(radius)
+    except ValueError:
+        messagebox.showwarning("Input Error", "Elixir, Hitpoints, Damage, Range, Stun Duration, and Radius must be numbers.")
+        return
+
+    conn = sqlite3.connect('cards.txt')
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO cards (name, elixir, type, description, hitpoints, damage, range, stun_duration, shield, movement_speed, radius)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (name, elixir, card_type, description.strip(), hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius))
+    conn.commit()
+    conn.close()
+    messagebox.showinfo("Success", "Card saved successfully.")
+
+
 
 welcome_button = ttk.Button(options_frame , text= 'Welcome' , command=lambda:switch_page(welcome_switch_page,welcome_page))
 welcome_button.place(x=20 , y= 20, width=130)
