@@ -469,7 +469,28 @@ def profile_maker_page():
     profile_maker_frame.pack()
 
 def save_card_to_file(name, elixir, card_type, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius):
-    pass
+    if not name or not elixir or not card_type or not description:
+        messagebox.showwarning("Input Error", "Name, Elixir, Type, and Description are required fields.")
+        return
+
+    try:
+        elixir = int(elixir)
+        hitpoints = int(hitpoints)
+        damage = int(damage)
+        card_range = int(card_range)
+        stun_duration = float(stun_duration)
+        radius = float(radius)
+    except ValueError:
+        messagebox.showwarning("Input Error", "Elixir, Hitpoints, Damage, Range, Stun Duration, and Radius must be numbers.")
+        return
+
+    card_data = [name, elixir, card_type, description.strip(), hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius]
+
+    with open('cards.txt', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(card_data)
+    
+    messagebox.showinfo("Success", "Card saved successfully.")
 
 def profile_maker_page():
     profile_maker_frame = ScrolledFrame(main_frame, padding=5, height=10, autohide=True)
