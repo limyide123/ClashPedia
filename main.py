@@ -9,6 +9,7 @@ from PIL import Image, ImageTk
 from ttkbootstrap.scrolled import ScrolledFrame
 import os
 from tkinter import PhotoImage
+import csv
 
 window = ttk.Window(themename='solar')
 window.title("ClashPedia")
