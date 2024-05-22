@@ -98,7 +98,6 @@ logo_label.place(x=10, y=20)
 def hide_switch_page():
     welcome_switch_page.config(bg='#c3c3c3')
     categories_switch_page.config(bg='#c3c3c3')
-    avg_elixir_cal_switch_page.config(bg='#c3c3c3')
     deck_builder_switch_page.config(bg='#c3c3c3')
     profile_maker_switch_page.config(bg='#c3c3c3')
 
@@ -310,92 +309,6 @@ def show_image(event, image_path):
     image_label = tk.Label(image_window, image=img)
     image_label.image = img
     image_label.pack(padx=20, pady=20)
-
-def avg_elixir_cal_page():
-    avg_elixir_cal_frame = ScrolledFrame(main_frame, autohide=True)
-    avg_elixir_cal_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
-    lb = tk.Label(avg_elixir_cal_frame , text= 'Average Elixir Calculator', font=('Showcard Gothic', 20, 'bold'))
-    lb.place(x=20 , y = 10)
-    lb.pack(padx=10 ,pady=20)
-    
-    categories = [("Elixir 1", "Elixir_1", 1), ("Elixir 2", "Elixir_2", 2), ("Elixir 3", "Elixir_3", 3), ("Elixir 4", "Elixir_4", 4), ("Elixir 5", "Elixir_5", 5), ("Elixir 6", "Elixir_6", 6), ("Elixir 7", "Elixir_7", 7), ("Elixir 8", "Elixir_8", 8), ("Elixir 9", "Elixir_9", 9)]
-
-    for section, category, value in categories:
-        lb = tk.Label(avg_elixir_cal_frame, text=section, font=('Rockwell Extra Bold', 15, 'bold'))
-        lb.pack(padx=10, pady=10)        
-        for i in range(3):
-            row_frame = tk.Frame(avg_elixir_cal_frame)
-            row_frame.pack()
-            for j in range(11):
-                try:
-                    image_path = f"average_elixir_calculator_images/{category}/card_{i*11 + j + 1}.png"
-                    img = Image.open(image_path)
-                    img = img.resize((90, 120), Image.LANCZOS)
-                    img = ImageTk.PhotoImage(img)
-                    panel = tk.Label(row_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
-                    panel.image = img
-                    panel.pack(side=tk.LEFT)
-
-                    var = tk.BooleanVar()
-                    checkbutton = ttk.Checkbutton(row_frame, variable=var, command=lambda v=var, p=panel, val = value, cat=category: elixir_checkbutton_click(v, p, val, cat))
-                    checkbutton.pack(side=tk.LEFT, padx=5, pady=5)
-
-                except FileNotFoundError:
-                    break
-
-    results_btn = tk.Button(avg_elixir_cal_frame, text="Results", command=cal_results)
-    results_btn.pack(padx=10, pady=10)
-    avg_elixir_cal_frame.pack()
-
-elixir_num_selected = 0
-
-elixir_category_counts={
-    "Elixir_1":0,
-    "Elixir_2":0,
-    "Elixir_3":0,
-    "Elixir_4":0,
-    "Elixir_5":0,
-    "Elixir_6":0,
-    "Elixir_7":0,
-    "Elixir_8":0,
-    "Elixir_9":0
-}
-
-def elixir_checkbutton_click(var, panel, val, category):
-    global elixir_num_selected
-    if var.get():
-        # Check if total selected cards exceed 8
-        if elixir_num_selected >= 8:
-            messagebox.showwarning("Limit Exceeded", "You can only select up to 8 cards.")
-            var.set(False)
-            return
-        elixir_category_counts[category] += val
-        elixir_num_selected += 1
-        panel.config(state='normal')
-    else:
-        elixir_category_counts[category] -= val
-        elixir_num_selected -= 1
-        panel.config(state='normal')
-
-def cal_results():
-    total_elixir = sum(elixir_category_counts.values())
-    average_elixir = total_elixir / 8  # Assuming the user selects exactly 8 cards
-
-    feedback = ""
-    if 0.1 <= average_elixir <= 2.0:
-        feedback = "You're a fast cycle guy"
-    elif 2.1 <= average_elixir <= 3.2:
-        feedback = "You're either using 2.6 hog or 2.9 mortar"
-    elif 3.3 <= average_elixir <= 4.1:
-        feedback = "You're not dependent on cycle decks now"
-    elif 4.2 <= average_elixir <= 4.7:
-        feedback = "Woah, that's a bit too expensive"
-    elif 4.8 <= average_elixir <= 5.6:
-        feedback = "Are you trolling at this point?"
-    else:
-        feedback = "I'm certain you're playing 7x elixir"
-
-    messagebox.showinfo("Average Elixir and Feedback", f"Average Elixir: {average_elixir:.2f}\nFeedback: {feedback}")
 
 def deck_builder_page():
     deck_builder_frame = ScrolledFrame(main_frame, autohide=True)
@@ -653,20 +566,15 @@ categories_button.place(x=20 , y= 80, width=130)
 categories_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
 categories_switch_page.place(x=3, y=80, width=5, height =40)
 
-avg_elixir_cal_button = ttk.Button(options_frame , text= 'Average Elixir\nCalculator' , command=lambda:switch_page(avg_elixir_cal_switch_page,avg_elixir_cal_page))
-avg_elixir_cal_button.place(x=20 , y= 140, width=130, height=60)
-avg_elixir_cal_switch_page = tk.Label(options_frame, bg='#c3c3c3')
-avg_elixir_cal_switch_page.place(x=3, y=140, width=5, height =60)
-
 deck_builder_button = ttk.Button(options_frame , text= 'Deck Builder' , command=lambda:switch_page(deck_builder_switch_page,deck_builder_page))
-deck_builder_button.place(x=20 , y= 220, width=130, height=40)
+deck_builder_button.place(x=20 , y= 140, width=130, height=40)
 deck_builder_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
-deck_builder_switch_page.place(x=3, y=220, width=5, height =40)
+deck_builder_switch_page.place(x=3, y=140, width=5, height =40)
 
 profile_maker_button = ttk.Button(options_frame, text='Profile Maker', command=lambda: switch_page(profile_maker_switch_page, profile_maker_page))
-profile_maker_button.place(x=20, y=280, width=130, height=40)
+profile_maker_button.place(x=20, y=200, width=130, height=40)
 profile_maker_switch_page = tk.Label(options_frame, text='', bg='#c3c3c3')
-profile_maker_switch_page.place(x=3, y=280, width=5, height=40)
+profile_maker_switch_page.place(x=3, y=200, width=5, height=40)
 
 
 window.mainloop()
