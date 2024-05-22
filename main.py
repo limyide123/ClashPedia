@@ -498,7 +498,28 @@ def profile_maker_page():
     profile_maker_frame.pack()
 
 def save_card_to_file(name, elixir, card_type, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius):
-    pass
+    if not name or not elixir or not card_type or not description:
+        messagebox.showwarning("Input Error", "Name, Elixir, Type, and Description are required fields.")
+        return
+
+    try:
+        elixir = int(elixir)
+        hitpoints = int(hitpoints)
+        damage = int(damage)
+        card_range = int(card_range)
+        stun_duration = float(stun_duration)
+        radius = float(radius)
+    except ValueError:
+        messagebox.showwarning("Input Error", "Elixir, Hitpoints, Damage, Range, Stun Duration, and Radius must be numbers.")
+        return
+
+    card_data = [name, elixir, card_type, description.strip(), hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius]
+
+    with open('cards.txt', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(card_data)
+    
+    messagebox.showinfo("Success", "Card saved successfully.")
 
 welcome_button = ttk.Button(options_frame , text= 'Welcome' , command=lambda:switch_page(welcome_switch_page,welcome_page))
 welcome_button.place(x=20 , y= 20, width=130)
