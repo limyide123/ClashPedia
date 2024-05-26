@@ -314,17 +314,17 @@ def show_image(event, image_path):
 def deck_builder_page():
     deck_builder_frame = ScrolledFrame(main_frame, autohide=True)
     deck_builder_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
-    lb = tk.Label(deck_builder_frame, text='Deck Builder', font=('Showcard Gothic', 15, 'bold'))
+    lb = tk.Label(deck_builder_frame, text='Deck Builder', font=('Showcard Gothic', 30, 'bold'))
     lb.place(x=20, y=10)
     lb.pack(padx=10, pady=20)
 
     categories = [("Win Condition", "WinCondition", 1, 2,), ("Spells", "Spells", 1, 3), ("Mini Tanks", "MiniTanks", 0, 2), ("Buildings", "Buildings", 0, 2), ("Damage Units", "DamageUnits", 2, 4)]
 
     for section, category, min_val, max_val in categories:
-        category_frame = tk.Frame(deck_builder_frame, bg="white", bd=2, relief=tk.GROOVE)
+        category_frame = tk.Frame(deck_builder_frame)
         category_frame.pack(pady=10, padx=10, fill=tk.X)
 
-        lb = tk.Label(category_frame, text=section)
+        lb = tk.Label(category_frame, text=section, font=('Showcard Gothic', 15, 'bold'))
         lb.pack(padx=10, pady=10)
         for i in range(15):
             row_frame = tk.Frame(category_frame, bg="white")
