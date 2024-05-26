@@ -403,12 +403,20 @@ def save_card_to_file(name, elixir, card_type, description, hitpoints, damage, c
         messagebox.showwarning("Input Error", "Elixir, Hitpoints, Damage, Range, Stun Duration, and Radius must be numbers.")
         return
 
-    card_data = [name, elixir, card_type, description.strip(), hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius]
+    with open('cards.txt', 'a') as file:
+        file.write(f"Name: {name}\n")
+        file.write(f"Elixir: {elixir}\n")
+        file.write(f"Type: {card_type}\n")
+        file.write(f"Description: {description.strip()}\n")
+        file.write(f"Hitpoints: {hitpoints}\n")
+        file.write(f"Damage: {damage}\n")
+        file.write(f"Range: {card_range}\n")
+        file.write(f"Stun Duration: {stun_duration}\n")
+        file.write(f"Shield: {shield}\n")
+        file.write(f"Movement Speed: {movement_speed}\n")
+        file.write(f"Radius: {radius}\n")
+        file.write("\n")  
 
-    with open('cards.txt', 'a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(card_data)
-    
     messagebox.showinfo("Success", "Card saved successfully.")
 
 def profile_maker_page():
