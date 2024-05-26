@@ -9,4 +9,3 @@ Stun Duration: 0.0
 Shield: 0
 Movement Speed: 90
 Radius: 0.0
-
