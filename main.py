@@ -247,7 +247,7 @@ def categories_page(category=None):
         categories = {
             'type': ["Spells", "Troop", "Buildings"],
             'arena': ["Arena 1", "Arena 2", "Arena 3"],
-            'elixir': ["Elixir_1", "Elixir_2", "Elixir_3"],
+            'elixir': ["Elixir_1", "Elixir_2", "Elixir_3","Elixir_4","Elixir_5","Elixir_6","Elixir_7","Elixir_8","Elixir_9"],
             'rarity': ["Common", "Rare", "Epic", "Legendary", "Champion", "Funny"]
         }
 
@@ -269,29 +269,14 @@ def categories_page(category=None):
         rarity_button = ttk.Button(button_frame, text='Rarity', command=lambda: show_categories('rarity'))
         rarity_button.pack(side=LEFT, padx=5)
 
-        canvas = tk.Canvas(main_frame)
-        scrollbar = ttk.Scrollbar(main_frame, orient=VERTICAL, command=canvas.yview)
-        scrollable_frame = ttk.Frame(canvas)
-
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(
-                scrollregion=canvas.bbox("all")
-            )
-        )
-
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-
-        canvas.pack(side=LEFT, fill=BOTH, expand=YES)
-        scrollbar.pack(side=RIGHT, fill=Y)
+        category_frame = ScrolledFrame(main_frame, autohide=True)
+        category_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
 
         row = 0
         for title in categories.get(category, []):
-            category_frame = tk.Frame(scrollable_frame)
-            category_frame.pack(pady=10, padx=10, fill=tk.X)
 
-            title_label = tk.Label(category_frame, text=title, font=('Helvetica', 16, 'bold'))
+
+            title_label = tk.Label(category_frame, text=title, font=('Showcard Gothic', 16, 'bold'))
             title_label.pack(pady=5)
 
             img_dir = os.path.join("clash-royale-card-elixir", title)
@@ -319,17 +304,24 @@ def categories_page(category=None):
     button_frame.pack(fill=X, padx=10, pady=5)
 
     type_button = ttk.Button(button_frame, text='Type', command=lambda: show_categories('type'))
+
+    type_button = ttk.Button(button_frame, text='Type', command=lambda: show_categories('type'))
     type_button.pack(side=LEFT, padx=5)
 
+    arena_button = ttk.Button(button_frame, text='Arena', command=lambda: show_categories('arena'))
     arena_button = ttk.Button(button_frame, text='Arena', command=lambda: show_categories('arena'))
     arena_button.pack(side=LEFT, padx=5)
 
     elixir_button = ttk.Button(button_frame, text='Elixir', command=lambda: show_categories('elixir'))
+    elixir_button = ttk.Button(button_frame, text='Elixir', command=lambda: show_categories('elixir'))
     elixir_button.pack(side=LEFT, padx=5)
 
     rarity_button = ttk.Button(button_frame, text='Rarity', command=lambda: show_categories('rarity'))
+    rarity_button = ttk.Button(button_frame, text='Rarity', command=lambda: show_categories('rarity'))
     rarity_button.pack(side=LEFT, padx=5)
 
+    if category:
+        show_categories(category)
     if category:
         show_categories(category)
 
