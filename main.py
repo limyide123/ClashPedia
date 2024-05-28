@@ -338,6 +338,9 @@ def categories_page(category=None):
     if category:
         show_categories(category)
 
+    else:
+        show_categories('rarity')
+
 def show_image(event, image_path):
     image_window = tk.Toplevel()
     image_window.title("Card Image")
