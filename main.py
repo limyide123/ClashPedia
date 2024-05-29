@@ -35,7 +35,7 @@ def setup_database():
     ''')
 
     cursor.execute('''
-    CREATE TABLE IF NOT EXISTS profile_cards (
+    CREATE TABLE IF NOT EXISTS profilecards (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
         elixir INTEGER,
