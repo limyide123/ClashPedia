@@ -357,24 +357,27 @@ def show_image(event, image_path):
 def deck_builder_page():
     deck_builder_frame = ScrolledFrame(main_frame, autohide=True)
     deck_builder_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
-    lb = tk.Label(deck_builder_frame, text='Deck Builder', font=('Showcard Gothic', 15, 'bold'))
+    lb = tk.Label(deck_builder_frame, text='Deck Builder', font=('Showcard Gothic', 30, 'bold'))
     lb.place(x=20, y=10)
     lb.pack(padx=10, pady=20)
 
-    categories = [("Win Condition", "WinCondition", 1, 2), ("Spells", "Spells", 1, 3), ("Mini Tanks", "MiniTanks", 0, 2), ("Buildings", "Buildings", 0, 2), ("Damage Units", "DamageUnits", 2, 4)]
+    categories = [("Win Condition", "WinCondition", 1, 2,), ("Spells", "Spells", 1, 3), ("Mini Tanks", "MiniTanks", 0, 2), ("Buildings", "Buildings", 0, 2), ("Damage Units", "DamageUnits", 2, 4)]
 
     for section, category, min_val, max_val in categories:
-        category_frame = tk.Frame(deck_builder_frame, bg="white", bd=2, relief=tk.GROOVE)
+        category_frame = tk.Frame(deck_builder_frame)
         category_frame.pack(pady=10, padx=10, fill=tk.X)
-        
-        lb = tk.Label(category_frame, text=section)
-        lb.pack(padx=10, pady=10)        
-        for i in range(4):
+
+        lb = tk.Label(category_frame, text=section, font=('Showcard Gothic', 15, 'bold'))
+        lb.pack(padx=10, pady=10)
+        for i in range(15):
             row_frame = tk.Frame(category_frame, bg="white")
             row_frame.pack()
             for j in range(13):
                 try:
-                    image_path = f"deck_builder_images/{category}/card_{i*13 + j + 1}.png"
+                    # Adjust the filename to parse elixir cost
+                    file_name = f"card_{i*13 + j + 1}.png"
+                    image_path = f"deck_builder_images/{category}/{file_name}"
+
                     img = Image.open(image_path)
                     img = img.resize((90, 120), Image.LANCZOS)
                     img = ImageTk.PhotoImage(img)
@@ -383,7 +386,7 @@ def deck_builder_page():
                     panel.pack(side=tk.LEFT)
 
                     var = tk.BooleanVar()
-                    checkbutton = ttk.Checkbutton(row_frame, variable=var, command=lambda v=var, p=panel, min_val=min_val, max_val=max_val, cat=category: on_checkbutton_click(v, p, min_val, max_val, cat))
+                    checkbutton = ttk.Checkbutton(row_frame, variable=var, command=lambda v=var, p=panel, min_val=min_val, max_val=max_val, cat=category, fname=file_name: on_checkbutton_click(v, p, min_val, max_val, cat, fname))
                     checkbutton.pack(side=tk.LEFT, padx=5, pady=5)
 
                 except FileNotFoundError:
@@ -391,6 +394,7 @@ def deck_builder_page():
 
     results_btn = tk.Button(deck_builder_frame, text="Results", command=show_results)
     results_btn.pack(padx=10, pady=10)
+
 
 num_selected = 0 
 category_counts = {
@@ -401,34 +405,174 @@ category_counts = {
     "DamageUnits": 0
 }
 
-def on_checkbutton_click(var, panel, min_val, max_val, category):
-    global num_selected
+elixir_category_counts = 0
+
+elixir_category_counts = {"WinCondition": 0, "Spells": 0, "MiniTanks": 0, "Buildings": 0, "DamageUnits": 0}
+
+elixir_costs = {
+    "card_1.png": 2,
+    "card_2.png": 3,
+    "card_3.png": 3,
+    "card_4.png": 3,
+    "card_5.png": 3,
+    "card_6.png": 4,
+    "card_7.png": 4,
+    "card_8.png": 4,
+    "card_9.png": 4,
+    "card_10.png": 5,
+    "card_11.png": 5,
+    "card_12.png": 5,
+    "card_13.png": 5,
+    "card_14.png": 5,
+    "card_15.png": 6,
+    "card_16.png": 6,
+    "card_17.png": 6,
+    "card_18.png": 7,
+    "card_19.png": 7,
+    "card_20.png": 8,
+    "card_21.png": 9,
+    "card_27.png": 1,
+    "card_28.png": 2,
+    "card_29.png": 2,
+    "card_30.png": 2,
+    "card_31.png": 2,
+    "card_32.png": 2,
+    "card_33.png": 3,
+    "card_34.png": 3,
+    "card_35.png": 3,
+    "card_36.png": 3,
+    "card_37.png": 3,
+    "card_38.png": 4,
+    "card_39.png": 4,
+    "card_40.png": 4,
+    "card_41.png": 6,
+    "card_42.png": 6,
+    "card_53.png": 2,
+    "card_54.png": 3,
+    "card_55.png": 3,
+    "card_56.png": 3,
+    "card_57.png": 3,
+    "card_58.png": 4,
+    "card_59.png": 4,
+    "card_60.png": 4,
+    "card_61.png": 4,
+    "card_62.png": 4,
+    "card_63.png": 4,
+    "card_64.png": 4,
+    "card_65.png": 4,
+    "card_66.png": 4,
+    "card_67.png": 4,
+    "card_68.png": 5,
+    "card_69.png": 5,
+    "card_70.png": 5,
+    "card_71.png": 5,
+    "card_72.png": 5,
+    "card_73.png": 6,
+    "card_79.png": 3,
+    "card_80.png": 3,
+    "card_81.png": 4,
+    "card_82.png": 4,
+    "card_83.png": 4,
+    "card_84.png": 4,
+    "card_85.png": 5,
+    "card_86.png": 5,
+    "card_87.png": 6,
+    "card_88.png": 7,
+    "card_92.png": 1,
+    "card_93.png": 1,
+    "card_94.png": 1,
+    "card_95.png": 1,
+    "card_96.png": 1,
+    "card_97.png": 2,
+    "card_98.png": 2,
+    "card_99.png": 2,
+    "card_100.png": 2,
+    "card_101.png": 3,
+    "card_102.png": 3,
+    "card_103.png": 3,
+    "card_104.png": 3,
+    "card_105.png": 3,
+    "card_106.png": 3,
+    "card_107.png": 3,
+    "card_108.png": 3,
+    "card_109.png": 3,
+    "card_110.png": 3,
+    "card_111.png": 3,
+    "card_112.png": 4,
+    "card_113.png": 4,
+    "card_114.png": 4,
+    "card_115.png": 4,
+    "card_116.png": 4,
+    "card_117.png": 4,
+    "card_118.png": 4,
+    "card_119.png": 4,
+    "card_120.png": 4,
+    "card_121.png": 4,
+    "card_122.png": 4,
+    "card_123.png": 5,
+    "card_124.png": 5,
+    "card_125.png": 5,
+    "card_126.png": 5,
+    "card_127.png": 5,
+    "card_128.png": 5,
+    "card_129.png": 6,
+    "card_130.png": 6,
+    "card_131.png": 7,
+    "card_132.png": 7,
+    "card_133.png": 7,
+}
+
+def on_checkbutton_click(var, panel, min_val, max_val, category, file_name):
+    global num_selected, category_counts, elixir_category_counts
     if var.get():
         
         if num_selected >= 8:
             messagebox.showwarning("Limit Exceeded", "You can only select up to 8 cards.")
             var.set(False)
             return
-        
+
+        elixir_cost = elixir_costs[file_name]  # Get the elixir cost from the dictionary
+        elixir_category_counts[category] += elixir_cost
         category_counts[category] += 1
         num_selected += 1
         panel.config(state='normal')
     else:
+        elixir_cost = elixir_costs[file_name]  # Get the elixir cost from the dictionary
+        elixir_category_counts[category] -= elixir_cost
         category_counts[category] -= 1
         num_selected -= 1
         panel.config(state='normal')
 
 def show_results():
-    results = []
-    categories = [("Win Condition", "WinCondition", 1, 2), ("Spells", "Spells", 1, 3), ("Mini Tanks", "MiniTanks", 0, 2), ("Buildings", "Buildings", 0, 2), ("Damage Units", "DamageUnits", 2, 4)]
+    if num_selected < 8:
+        messagebox.showwarning("Warning", "You must select 8 cards!")
+    else:
+        total_elixir = sum(elixir_category_counts.values())
+        average_elixir = total_elixir / 8
+        results = []
+        categories = [("Win Condition", "WinCondition", 1, 2), ("Spells", "Spells", 1, 3), ("Mini Tanks", "MiniTanks", 0, 2), ("Buildings", "Buildings", 0, 2), ("Damage Units", "DamageUnits", 2, 4)]
 
-    for section, category, min_val, max_val in categories:
-        if category_counts[category] < min_val or category_counts[category] > max_val:
-            results.append(f"{section}: bad")
+        feedback = ""
+        if 0.1 <= average_elixir <= 2.0:
+            feedback = "You're a fast cycle guy"
+        elif 2.1 <= average_elixir <= 3.2:
+            feedback = "You're either using 2.6 hog or 2.9 mortar"
+        elif 3.3 <= average_elixir <= 4.1:
+            feedback = "You're not dependent on cycle decks now"
+        elif 4.2 <= average_elixir <= 4.7:
+            feedback = "Woah, that's a bit too expensive"
+        elif 4.8 <= average_elixir <= 5.6:
+            feedback = "Are you trolling at this point?"
         else:
-            results.append(f"{section}: good")
+            feedback = "I'm certain you're playing 7x elixir"
 
-    messagebox.showinfo("Results", "\n".join(results))
+        for section, category, min_val, max_val, in categories:
+            if category_counts[category] < min_val or category_counts[category] > max_val:
+                results.append(f"{section}: bad")
+            else:
+                results.append(f"{section}: good")
+
+        messagebox.showinfo("Results", "\n".join(results) + "\n" + "\n" + "Average Elixir: {:.2f}\nFeedback: {}".format(average_elixir, feedback))
 
 def save_card_to_file(name, elixir, card_type, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius):
     if not name or not elixir or not card_type or not description:
