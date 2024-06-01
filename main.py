@@ -595,7 +595,6 @@ def show_results():
 
         messagebox.showinfo("Results", "\n".join(results) + "\n" + "\n" + "Average Elixir: {:.2f}\nFeedback: {}".format(average_elixir, feedback))
 
-
 def save_card_to_file(name, rarity, elixir, card_type, arena, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius, image_path=None):
     if not name or not rarity or not elixir or not card_type or not arena or not description:
         messagebox.showwarning("Input Error", "Name, Rarity, Elixir, Type, Arena, and Description are required fields.")
@@ -616,15 +615,20 @@ def save_card_to_file(name, rarity, elixir, card_type, arena, description, hitpo
     cursor = conn.cursor()
 
     cursor.execute('''
-    INSERT INTO profile_cards (name, rarity, elixir, card_type, arena, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius, image_path)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO profile_cards (name, raity, elixir, card_type, arena, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius, image_path)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (name, rarity, elixir, card_type, arena, description.strip(), hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius, image_path))
 
     conn.commit()
     conn.close()
 
-    messagebox.showinfo("Success", "Card saved successfully.")
+    card_data = [name, rarity, elixir, card_type, description.strip(), hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius]
 
+    with open('cards.txt', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(card_data)
+    
+    messagebox.showinfo("Success", "Card saved successfully.")
 
 def upload_image():
     root = Tk()
@@ -655,9 +659,9 @@ def profile_maker_page():
     rarity_entry.grid(row=1, column=1, padx=5, pady=5)
 
     elixir_label = tk.Label(form_frame, text="Elixir Cost:")
-    elixir_label.grid(row=1, column=0, padx=5, pady=5)
+    elixir_label.grid(row=2, column=0, padx=5, pady=5)
     elixir_entry = tk.Entry(form_frame)
-    elixir_entry.grid(row=1, column=1, padx=5, pady=5)
+    elixir_entry.grid(row=2, column=1, padx=5, pady=5)
 
     type_label = tk.Label(form_frame, text="Card Type:")
     type_label.grid(row=3, column=0, padx=5, pady=5)
