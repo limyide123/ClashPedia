@@ -10,7 +10,6 @@ from ttkbootstrap.scrolled import ScrolledFrame
 import os
 from tkinter import PhotoImage
 import sqlite3
-import csv
 from tkinter import Tk, filedialog
 
 def setup_database():
@@ -622,12 +621,6 @@ def save_card_to_file(name, rarity, elixir, card_type, arena, description, hitpo
     conn.commit()
     conn.close()
 
-    card_data = [name, rarity, elixir, card_type, description.strip(), hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius]
-
-    with open('cards.txt', 'a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(card_data)
-    
     messagebox.showinfo("Success", "Card saved successfully.")
 
 def upload_image():
