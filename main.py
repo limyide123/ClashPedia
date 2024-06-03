@@ -33,8 +33,84 @@ def setup_database():
     )
     ''')
 
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS profilecards (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        elixir INTEGER,
+        card_type TEXT,
+        arena TEXT,
+        description TEXT,
+        hitpoints INTEGER,
+        damage INTEGER,
+        card_range INTEGER,
+        stun_duration REAL,
+        shield TEXT,
+        movement_speed TEXT,
+        radius REAL,
+        image_path TEXT
+    )
+    ''')
+
+    categories = [
+        ('Common', 'common'),
+        ('Rare', 'rare'),
+        ('Epic', 'epic'),
+        ('Legendary', 'legendary'),
+        ('Champion', 'champion'),
+        ('Funny', 'funny'),
+        ('Elixir_1', 'elixir_1'),
+        ('Elixir_2', 'elixir_2'),
+        ('Elixir_3', 'elixir_3'),
+        ('Elixir_4', 'elixir_4'),
+        ('Elixir_5', 'elixir_5'),
+        ('Elixir_6', 'elixir_6'),
+        ('Elixir_7', 'elixir_7'),
+        ('Elixir_8', 'elixir_8'),
+        ('Elixir_9', 'elixir_9'),
+        ('Spells', 'spells'),
+        ('Buildings', 'buildings'),
+        ('Troop', 'troop'),
+        ('Arena_0', 'arena_0'),
+        ('Arena_1', 'arena_1'),
+        ('Arena_2', 'arena_2'),
+        ('Arena_3', 'arena_3'),
+        ('Arena_4', 'arena_4'),
+        ('Arena_5', 'arena_5'),
+        ('Arena_6', 'arena_6'),
+        ('Arena_7', 'arena_7'),
+        ('Arena_8', 'arena_8'),
+        ('Arena_9', 'arena_9'),
+        ('Arena_10', 'arena_10'),
+        ('Arena_11', 'arena_11'),
+        ('Arena_12', 'arena_12'),
+        ('Arena_13', 'arena_13'),
+        ('Arena_14', 'arena_14'),
+        ('Arena_15', 'arena_15'),
+        ('Arena_16', 'arena_16'),
+        ('Arena_17', 'arena_17'),
+        ('Arena_18', 'arena_18'),
+    ]
+
+    for category_name, directory in categories:
+        cursor.execute('SELECT id FROM categories WHERE name = ?', (category_name,))
+        category_id = cursor.fetchone()
+        if not category_id:
+            cursor.execute('INSERT INTO categories (name, directory) VALUES (?, ?)', (category_name, directory))
+            category_id = cursor.lastrowid
+        else:
+            category_id = category_id[0]
+
+        image_dir = os.path.join("clash-royale-card-elixir", directory)
+        for filename in os.listdir(image_dir):
+            if filename.endswith('.png'):
+                cursor.execute('SELECT id FROM images WHERE category_id = ? AND filename = ?', (category_id, filename))
+                if not cursor.fetchone():
+                    cursor.execute('INSERT INTO images (category_id, filename) VALUES (?, ?)', (category_id, filename))
+
     conn.commit()
     conn.close()
+
 
 setup_database()
 
