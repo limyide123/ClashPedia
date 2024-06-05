@@ -10,7 +10,6 @@ from ttkbootstrap.scrolled import ScrolledFrame
 import os
 from tkinter import PhotoImage
 import sqlite3
-import csv
 from tkinter import Tk, filedialog
 
 def setup_database():
@@ -38,6 +37,7 @@ def setup_database():
     CREATE TABLE IF NOT EXISTS profilecards (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
+        rarity TEXT,
         elixir INTEGER,
         card_type TEXT,
         arena TEXT,
@@ -460,6 +460,39 @@ def show_image(event, image_path):
     image_label = tk.Label(image_window, image=img)
     image_label.image = img
     image_label.pack(padx=20, pady=20)
+    
+    conn = sqlite3.connect('clash_royale.db')
+    cursor = conn.cursor()
+
+    cursor.execute('''
+    SELECT pc.*, img.*
+    FROM profile_cards pc
+    JOIN images img ON pc.image_id = img.image_id
+    WHERE img.image_path = ?
+    ''', (image_path,))
+    
+    card_data = cursor.fetchone()
+    conn.close()
+
+    if card_data:
+        card_info_frame = tk.Frame(image_window)
+        card_info_frame.pack(pady=10)
+
+        labels = ["Name:", "Rarity:", "Elixir:", "Type:", "Arena:", "Description:", "Hitpoints:", "Damage:", "Card Range:",
+                  "Stun Duration:", "Shield:", "Movement Speed:", "Radius:"]
+
+        for i, label_text in enumerate(labels):
+            label = tk.Label(card_info_frame, text=label_text)
+            label.grid(row=i, column=0, padx=5, pady=5, sticky="w")
+
+            data_label = tk.Label(card_info_frame, text=str(card_data[i+1]))
+            data_label.grid(row=i, column=1, padx=5, pady=5, sticky="w")
+
+        # Adjust column weights
+        card_info_frame.columnconfigure(0, weight=1)
+        card_info_frame.columnconfigure(1, weight=1)
+
+
 
 # Global dictionary to store image paths for each deck
 decks = {f"Deck_{i+1}": [] for i in range(10)}
@@ -749,9 +782,9 @@ def display_deck_images(container_frame, selected_image_paths):
             row_frame.pack(pady=5)
             col = 0
 
-def save_card_to_file(name, elixir, card_type, arena, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius, image_path=None):
-    if not name or not elixir or not card_type or not arena or not description:
-        messagebox.showwarning("Input Error", "Name, Elixir, Type, Arena, and Description are required fields.")
+def save_card_to_file(name, rarity, elixir, card_type, arena, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius, image_path=None):
+    if not name or not rarity or not elixir or not card_type or not arena or not description:
+        messagebox.showwarning("Input Error", "Name, Rarity, Elixir, Type, Arena, and Description are required fields.")
         return
 
     try:
@@ -769,19 +802,13 @@ def save_card_to_file(name, elixir, card_type, arena, description, hitpoints, da
     cursor = conn.cursor()
 
     cursor.execute('''
-    INSERT INTO profile_cards (name, elixir, card_type, arena, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius, image_path)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (name, elixir, card_type, arena, description.strip(), hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius, image_path))
+    INSERT INTO profile_cards (name, rarity, elixir, card_type, arena, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius, image_path)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (name, rarity, elixir, card_type, arena, description.strip(), hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius, image_path))
 
     conn.commit()
     conn.close()
 
-    card_data = [name, elixir, card_type, description.strip(), hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius]
-
-    with open('cards.txt', 'a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(card_data)
-    
     messagebox.showinfo("Success", "Card saved successfully.")
 
 def upload_image():
@@ -807,63 +834,69 @@ def profile_maker_page():
     name_entry = tk.Entry(form_frame)
     name_entry.grid(row=0, column=1, padx=5, pady=5)
 
+    rarity_label = tk.Label(form_frame, text="Rarity:")
+    rarity_label.grid(row=1, column=0, padx=5, pady=5)
+    rarity_entry = tk.Entry(form_frame)
+    rarity_entry.grid(row=1, column=1, padx=5, pady=5)
+
     elixir_label = tk.Label(form_frame, text="Elixir Cost:")
-    elixir_label.grid(row=1, column=0, padx=5, pady=5)
+    elixir_label.grid(row=2, column=0, padx=5, pady=5)
     elixir_entry = tk.Entry(form_frame)
-    elixir_entry.grid(row=1, column=1, padx=5, pady=5)
+    elixir_entry.grid(row=2, column=1, padx=5, pady=5)
 
     type_label = tk.Label(form_frame, text="Card Type:")
-    type_label.grid(row=2, column=0, padx=5, pady=5)
+    type_label.grid(row=3, column=0, padx=5, pady=5)
     type_entry = tk.Entry(form_frame)
-    type_entry.grid(row=2, column=1, padx=5, pady=5)
+    type_entry.grid(row=3, column=1, padx=5, pady=5)
 
     arena_label = tk.Label(form_frame, text="Arena:")
-    arena_label.grid(row=3, column=0, padx=5, pady=5)
+    arena_label.grid(row=4, column=0, padx=5, pady=5)
     arena_entry = tk.Entry(form_frame)
-    arena_entry.grid(row=3, column=1, padx=5, pady=5)
+    arena_entry.grid(row=4, column=1, padx=5, pady=5)
 
     description_label = tk.Label(form_frame, text="Description:")
-    description_label.grid(row=4, column=0, padx=5, pady=5)
+    description_label.grid(row=5, column=0, padx=5, pady=5)
     description_text = tk.Text(form_frame, height=5, width=40)
-    description_text.grid(row=4, column=1, padx=5, pady=5)
+    description_text.grid(row=5, column=1, padx=5, pady=5)
 
     hitpoints_label = tk.Label(form_frame, text="Hitpoints:")
-    hitpoints_label.grid(row=5, column=0, padx=5, pady=5)
+    hitpoints_label.grid(row=6, column=0, padx=5, pady=5)
     hitpoints_entry = tk.Entry(form_frame)
-    hitpoints_entry.grid(row=5, column=1, padx=5, pady=5)
+    hitpoints_entry.grid(row=6, column=1, padx=5, pady=5)
 
     damage_label = tk.Label(form_frame, text="Damage:")
-    damage_label.grid(row=6, column=0, padx=5, pady=5)
+    damage_label.grid(row=7, column=0, padx=5, pady=5)
     damage_entry = tk.Entry(form_frame)
-    damage_entry.grid(row=6, column=1, padx=5, pady=5)
+    damage_entry.grid(row=7, column=1, padx=5, pady=5)
 
     range_label = tk.Label(form_frame, text="Range:")
-    range_label.grid(row=7, column=0, padx=5, pady=5)
+    range_label.grid(row=8, column=0, padx=5, pady=5)
     range_entry = tk.Entry(form_frame)
-    range_entry.grid(row=7, column=1, padx=5, pady=5)
+    range_entry.grid(row=8, column=1, padx=5, pady=5)
 
     stun_duration_label = tk.Label(form_frame, text="Stun Duration:")
-    stun_duration_label.grid(row=8, column=0, padx=5, pady=5)
+    stun_duration_label.grid(row=9, column=0, padx=5, pady=5)
     stun_duration_entry = tk.Entry(form_frame)
-    stun_duration_entry.grid(row=8, column=1, padx=5, pady=5)
+    stun_duration_entry.grid(row=9, column=1, padx=5, pady=5)
 
     shield_label = tk.Label(form_frame, text="Shield:")
-    shield_label.grid(row=9, column=0, padx=5, pady=5)
+    shield_label.grid(row=10, column=0, padx=5, pady=5)
     shield_entry = tk.Entry(form_frame)
-    shield_entry.grid(row=9, column=1, padx=5, pady=5)
+    shield_entry.grid(row=10, column=1, padx=5, pady=5)
 
     movement_speed_label = tk.Label(form_frame, text="Movement Speed:")
-    movement_speed_label.grid(row=10, column=0, padx=5, pady=5)
+    movement_speed_label.grid(row=11, column=0, padx=5, pady=5)
     movement_speed_entry = tk.Entry(form_frame)
-    movement_speed_entry.grid(row=10, column=1, padx=5, pady=5)
+    movement_speed_entry.grid(row=11, column=1, padx=5, pady=5)
 
     radius_label = tk.Label(form_frame, text="Radius:")
-    radius_label.grid(row=11, column=0, padx=5, pady=5)
+    radius_label.grid(row=12, column=0, padx=5, pady=5)
     radius_entry = tk.Entry(form_frame)
-    radius_entry.grid(row=11, column=1, padx=5, pady=5)
+    radius_entry.grid(row=12, column=1, padx=5, pady=5)
 
     save_button = tk.Button(form_frame, text="Save", command=lambda: save_card_to_file(
         name_entry.get(),
+        rarity_entry.get(),
         elixir_entry.get(),
         type_entry.get(),
         arena_entry.get(),
@@ -876,12 +909,13 @@ def profile_maker_page():
         movement_speed_entry.get(),
         radius_entry.get()
     ))
-    save_button.grid(row=12, column=0, columnspan=2, pady=10)
+    save_button.grid(row=13, column=0, columnspan=2, pady=10)
 
     upload_button = ttk.Button(form_frame, text="Upload Image", command=upload_image)
-    upload_button.grid(row=13, column=1, padx=5)
+    upload_button.grid(row=14, column=1, padx=5)
 
-    profile_maker_frame.pack()
+    profile_maker_frame.pack() 
+
 
 
 welcome_button = ttk.Button(options_frame , text= 'Welcome' , command=lambda:switch_page(welcome_switch_page,welcome_page))
