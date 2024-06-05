@@ -53,70 +53,11 @@ def setup_database():
     )
     ''')
 
-    categories = [
-        ('Common', 'common'),
-        ('Rare', 'rare'),
-        ('Epic', 'epic'),
-        ('Legendary', 'legendary'),
-        ('Champion', 'champion'),
-        ('Funny', 'funny'),
-        ('Elixir_1', 'elixir_1'),
-        ('Elixir_2', 'elixir_2'),
-        ('Elixir_3', 'elixir_3'),
-        ('Elixir_4', 'elixir_4'),
-        ('Elixir_5', 'elixir_5'),
-        ('Elixir_6', 'elixir_6'),
-        ('Elixir_7', 'elixir_7'),
-        ('Elixir_8', 'elixir_8'),
-        ('Elixir_9', 'elixir_9'),
-        ('Spells', 'spells'),
-        ('Buildings', 'buildings'),
-        ('Troop', 'troop'),
-        ('Arena_0', 'arena_0'),
-        ('Arena_1', 'arena_1'),
-        ('Arena_2', 'arena_2'),
-        ('Arena_3', 'arena_3'),
-        ('Arena_4', 'arena_4'),
-        ('Arena_5', 'arena_5'),
-        ('Arena_6', 'arena_6'),
-        ('Arena_7', 'arena_7'),
-        ('Arena_8', 'arena_8'),
-        ('Arena_9', 'arena_9'),
-        ('Arena_10', 'arena_10'),
-        ('Arena_11', 'arena_11'),
-        ('Arena_12', 'arena_12'),
-        ('Arena_13', 'arena_13'),
-        ('Arena_14', 'arena_14'),
-        ('Arena_15', 'arena_15'),
-        ('Arena_16', 'arena_16'),
-        ('Arena_17', 'arena_17'),
-        ('Arena_18', 'arena_18'),
-    ]
-
-    for category_name, directory in categories:
-        cursor.execute('SELECT id FROM categories WHERE name = ?', (category_name,))
-        category_id = cursor.fetchone()
-        if not category_id:
-            cursor.execute('INSERT INTO categories (name, directory) VALUES (?, ?)', (category_name, directory))
-            category_id = cursor.lastrowid
-        else:
-            category_id = category_id[0]
-
-        image_dir = os.path.join("clash-royale-card-elixir", directory)
-        for filename in os.listdir(image_dir):
-            if filename.endswith('.png'):
-                cursor.execute('SELECT id FROM images WHERE category_id = ? AND filename = ?', (category_id, filename))
-                if not cursor.fetchone():
-                    cursor.execute('INSERT INTO images (category_id, filename) VALUES (?, ?)', (category_id, filename))
-
     conn.commit()
     conn.close()
 
 
-<<<<<<< HEAD
 setup_database()
-=======
->>>>>>> c84e08cfc1cc0fdcd8c32be00158a364401f70ac
 
 window = ttk.Window(themename='solar')
 window.title("ClashPedia")
@@ -280,6 +221,7 @@ def welcome_page():
     welcome_frame.pack()
     
 def get_data_from_db(query, param=None):
+    
     conn = sqlite3.connect('clash_royale.db')
     cursor = conn.cursor()
     if param:
@@ -291,13 +233,16 @@ def get_data_from_db(query, param=None):
     return data
 
 def clear_main_frame():
+
     for widget in main_frame.winfo_children():
         widget.destroy()
 
 def show_categories(category):
+
     clear_main_frame()
 
     if category == 'elixir':
+
         query = """
         SELECT elixir, filename FROM images 
         ORDER BY 
@@ -314,7 +259,9 @@ def show_categories(category):
             WHEN elixir = '10' THEN 10
         END
         """
+
         data = get_data_from_db(query)
+
         titles = ["Elixir_1",
                   "Elixir_2",
                   "Elixir_3",
@@ -326,7 +273,9 @@ def show_categories(category):
                   "Elixir_9",
                   "Elixir_10"
                   ]
+        
     elif category == 'arena':
+
         query = """
         SELECT arena, filename FROM images 
         ORDER BY 
@@ -352,7 +301,9 @@ def show_categories(category):
             WHEN arena = '18' THEN 19
         END
         """
+
         data = get_data_from_db(query)
+
         titles = ["Arena 0",
                   "Arena 1",
                   "Arena 2",
@@ -372,7 +323,9 @@ def show_categories(category):
                   "Arena 16",
                   "Arena 17",
                   "Arena 18",]
+        
     elif category == 'type':
+
         query = """
         SELECT type, filename FROM images 
         ORDER BY 
@@ -382,9 +335,13 @@ def show_categories(category):
             WHEN type = 'Buildings' THEN 3
         END
         """
+
         data = get_data_from_db(query)
+
         titles = ["Spells", "Troop", "Buildings"]
+
     elif category == 'rarity':
+
         query = """
         SELECT rarity, filename FROM images 
         ORDER BY 
@@ -397,8 +354,15 @@ def show_categories(category):
             WHEN rarity = 'funny' THEN 6
         END
         """
+
         data = get_data_from_db(query)
-        titles = ["common", "rare", "epic", "legendary", "champion", "funny"]
+
+        titles = ["common",
+                  "rare",
+                  "epic",
+                  "legendary",
+                  "champion",
+                  "funny"]
 
     button_frame = tk.Frame(main_frame)
     button_frame.pack(fill=tk.X, padx=10, pady=5)
@@ -424,8 +388,11 @@ def show_categories(category):
     col = 0
 
     for title, filename in data:
+
         if title != current_title:
+
             if current_title is not None:
+
                 row += 1  
             current_title = title
             title_label = tk.Label(category_frame, text=current_title, font=("Showcard Gothic", 16, "bold"))
@@ -436,6 +403,7 @@ def show_categories(category):
         img_path = os.path.join("clash-royale-card-elixir", filename)
 
         if os.path.isfile(img_path):
+
             img = Image.open(img_path)
             img = img.resize((90, 120), Image.LANCZOS)
             img = ImageTk.PhotoImage(img)
@@ -452,6 +420,7 @@ def show_categories(category):
                 col = 0
 
 def categories_page(category=None):
+
     clear_main_frame()
 
     button_frame = tk.Frame(main_frame)
@@ -471,6 +440,7 @@ def categories_page(category=None):
 
     if category:
         show_categories(category)
+
     else:
         show_categories('rarity')
 
