@@ -247,7 +247,7 @@ def show_categories(category):
     if category == 'elixir':
 
         query = """
-        SELECT elixir, filename FROM images 
+        SELECT elixir, image_path FROM profile_cards
         ORDER BY 
         CASE 
             WHEN elixir = '1' THEN 1
@@ -280,7 +280,7 @@ def show_categories(category):
     elif category == 'arena':
 
         query = """
-        SELECT arena, filename FROM images 
+        SELECT arena, image_path FROM profile_cards
         ORDER BY 
         CASE 
             WHEN arena = '0' THEN 1
@@ -330,12 +330,12 @@ def show_categories(category):
     elif category == 'type':
 
         query = """
-        SELECT type, filename FROM images 
+        SELECT card_type, image_path FROM profile_cards 
         ORDER BY 
         CASE 
-            WHEN type = 'Spells' THEN 1
+            WHEN type = 'Spell' THEN 1
             WHEN type = 'Troop' THEN 2
-            WHEN type = 'Buildings' THEN 3
+            WHEN type = 'Building' THEN 3
         END
         """
 
@@ -346,7 +346,7 @@ def show_categories(category):
     elif category == 'rarity':
 
         query = """
-        SELECT rarity, filename FROM images 
+        SELECT rarity, image_path FROM profile_cards
         ORDER BY 
         CASE 
             WHEN rarity = 'common' THEN 1
@@ -567,7 +567,7 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
 
         if category == 'elixir':
             query = """
-            SELECT elixir, filename FROM images 
+            SELECT elixir, image_path FROM profile_cards 
             ORDER BY 
             CASE 
                 WHEN elixir = '1' THEN 1
@@ -585,7 +585,7 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
             data = get_data_from_db(query)
         elif category == 'arena':
             query = """
-            SELECT arena, filename FROM images 
+            SELECT arena, image_path FROM profile_cards
             ORDER BY 
             CASE 
                 WHEN arena = '0' THEN 1
@@ -612,18 +612,18 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
             data = get_data_from_db(query)
         elif category == 'type':
             query = """
-            SELECT type, filename FROM images 
+            SELECT card_type, image_path FROM profile_cards
             ORDER BY 
             CASE 
-                WHEN type = 'Spells' THEN 1
+                WHEN type = 'Spell' THEN 1
                 WHEN type = 'Troop' THEN 2
-                WHEN type = 'Buildings' THEN 3
+                WHEN type = 'Building' THEN 3
             END
             """
             data = get_data_from_db(query)
         elif category == 'rarity':
             query = """
-            SELECT rarity, filename FROM images 
+            SELECT rarity, image_path FROM profile_cards
             ORDER BY 
             CASE 
                 WHEN rarity = 'common' THEN 1
