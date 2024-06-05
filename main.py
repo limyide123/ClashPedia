@@ -373,6 +373,39 @@ def show_image(event, image_path):
     image_label = tk.Label(image_window, image=img)
     image_label.image = img
     image_label.pack(padx=20, pady=20)
+    
+    conn = sqlite3.connect('clash_royale.db')
+    cursor = conn.cursor()
+
+    cursor.execute('''
+    SELECT pc.*, img.*
+    FROM profile_cards pc
+    JOIN images img ON pc.image_id = img.image_id
+    WHERE img.image_path = ?
+    ''', (image_path,))
+    
+    card_data = cursor.fetchone()
+    conn.close()
+
+    if card_data:
+        card_info_frame = tk.Frame(image_window)
+        card_info_frame.pack(pady=10)
+
+        labels = ["Name:", "Rarity:", "Elixir:", "Type:", "Arena:", "Description:", "Hitpoints:", "Damage:", "Card Range:",
+                  "Stun Duration:", "Shield:", "Movement Speed:", "Radius:"]
+
+        for i, label_text in enumerate(labels):
+            label = tk.Label(card_info_frame, text=label_text)
+            label.grid(row=i, column=0, padx=5, pady=5, sticky="w")
+
+            data_label = tk.Label(card_info_frame, text=str(card_data[i+1]))
+            data_label.grid(row=i, column=1, padx=5, pady=5, sticky="w")
+
+        # Adjust column weights
+        card_info_frame.columnconfigure(0, weight=1)
+        card_info_frame.columnconfigure(1, weight=1)
+
+
 
 def deck_builder_page():
     deck_builder_frame = ScrolledFrame(main_frame, autohide=True)
@@ -614,8 +647,8 @@ def save_card_to_file(name, rarity, elixir, card_type, arena, description, hitpo
     cursor = conn.cursor()
 
     cursor.execute('''
-    INSERT INTO profile_cards (name, raity, elixir, card_type, arena, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius, image_path)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO profile_cards (name, rarity, elixir, card_type, arena, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius, image_path)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (name, rarity, elixir, card_type, arena, description.strip(), hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius, image_path))
 
     conn.commit()
@@ -726,7 +759,8 @@ def profile_maker_page():
     upload_button = ttk.Button(form_frame, text="Upload Image", command=upload_image)
     upload_button.grid(row=14, column=1, padx=5)
 
-    profile_maker_frame.pack()
+    profile_maker_frame.pack() 
+
 
 
 welcome_button = ttk.Button(options_frame , text= 'Welcome' , command=lambda:switch_page(welcome_switch_page,welcome_page))
