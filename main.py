@@ -221,6 +221,7 @@ def welcome_page():
     welcome_frame.pack()
     
 def get_data_from_db(query, param=None):
+    
     conn = sqlite3.connect('clash_royale.db')
     cursor = conn.cursor()
     if param:
@@ -240,9 +241,11 @@ def clear_main_frame(frame=None):
             widget.destroy()
 
 def show_categories(category):
+
     clear_main_frame()
 
     if category == 'elixir':
+
         query = """
         SELECT elixir, filename FROM images 
         ORDER BY 
@@ -259,7 +262,9 @@ def show_categories(category):
             WHEN elixir = '10' THEN 10
         END
         """
+
         data = get_data_from_db(query)
+
         titles = ["Elixir_1",
                   "Elixir_2",
                   "Elixir_3",
@@ -271,7 +276,9 @@ def show_categories(category):
                   "Elixir_9",
                   "Elixir_10"
                   ]
+        
     elif category == 'arena':
+
         query = """
         SELECT arena, filename FROM images 
         ORDER BY 
@@ -297,7 +304,9 @@ def show_categories(category):
             WHEN arena = '18' THEN 19
         END
         """
+
         data = get_data_from_db(query)
+
         titles = ["Arena 0",
                   "Arena 1",
                   "Arena 2",
@@ -317,7 +326,9 @@ def show_categories(category):
                   "Arena 16",
                   "Arena 17",
                   "Arena 18",]
+        
     elif category == 'type':
+
         query = """
         SELECT type, filename FROM images 
         ORDER BY 
@@ -327,9 +338,13 @@ def show_categories(category):
             WHEN type = 'Buildings' THEN 3
         END
         """
+
         data = get_data_from_db(query)
+
         titles = ["Spells", "Troop", "Buildings"]
+
     elif category == 'rarity':
+
         query = """
         SELECT rarity, filename FROM images 
         ORDER BY 
@@ -342,8 +357,15 @@ def show_categories(category):
             WHEN rarity = 'funny' THEN 6
         END
         """
+
         data = get_data_from_db(query)
-        titles = ["common", "rare", "epic", "legendary", "champion", "funny"]
+
+        titles = ["common",
+                  "rare",
+                  "epic",
+                  "legendary",
+                  "champion",
+                  "funny"]
 
     button_frame = tk.Frame(main_frame)
     button_frame.pack(fill=tk.X, padx=10, pady=5)
@@ -369,8 +391,11 @@ def show_categories(category):
     col = 0
 
     for title, filename in data:
+
         if title != current_title:
+
             if current_title is not None:
+
                 row += 1  
             current_title = title
             title_label = tk.Label(category_frame, text=current_title, font=("Showcard Gothic", 16, "bold"))
@@ -381,6 +406,7 @@ def show_categories(category):
         img_path = os.path.join("clash-royale-card-elixir", filename)
 
         if os.path.isfile(img_path):
+
             img = Image.open(img_path)
             img = img.resize((90, 120), Image.LANCZOS)
             img = ImageTk.PhotoImage(img)
@@ -397,6 +423,7 @@ def show_categories(category):
                 col = 0
 
 def categories_page(category=None):
+
     clear_main_frame()
 
     button_frame = tk.Frame(main_frame)
@@ -416,6 +443,7 @@ def categories_page(category=None):
 
     if category:
         show_categories(category)
+
     else:
         show_categories('rarity')
 
