@@ -232,10 +232,13 @@ def get_data_from_db(query, param=None):
     conn.close()
     return data
 
-def clear_main_frame():
-
-    for widget in main_frame.winfo_children():
-        widget.destroy()
+def clear_main_frame(frame=None):
+    if frame:
+        for widget in frame.winfo_children():
+            widget.destroy()
+    else:
+        for widget in main_frame.winfo_children():
+            widget.destroy()
 
 def show_categories(category):
 
@@ -458,225 +461,293 @@ def show_image(event, image_path):
     image_label.image = img
     image_label.pack(padx=20, pady=20)
 
+# Global dictionary to store image paths for each deck
+decks = {f"Deck_{i+1}": [] for i in range(10)}
+boxes = []
+
+def update_deck_display(container_frame, selected_images):
+    for widget in container_frame.winfo_children():
+        if isinstance(widget, tk.Frame) and not any(isinstance(w, tk.Label) for w in widget.winfo_children()):
+            widget.destroy()
+            
+    row_frame = tk.Frame(container_frame)
+    row_frame.pack(pady=5)
+    col = 0
+    
+    for img_path in selected_images:
+        img = Image.open(img_path)
+        img = img.resize((90, 120), Image.LANCZOS)
+        img = ImageTk.PhotoImage(img)
+        
+        box = tk.Frame(row_frame, width=90, height=120, bg='lightgray', borderwidth=1, relief='solid')
+        box.pack(side='left', padx=5)
+        box.pack_propagate(False)
+        
+        label = tk.Label(box, image=img)
+        label.image = img
+        label.pack(expand=True)
+        
+        col += 1
+        if col >= 4:
+            row_frame = tk.Frame(container_frame)
+            row_frame.pack(pady=5)
+            col = 0
+
+def on_box_click(deck_label, selected_images):
+    new_window = tk.Toplevel(window, width=1000, height=1925)
+    build_deck_page(new_window, selected_images, deck_label['text'].replace(" ", "_"), deck_label.master)
+
 def deck_builder_page():
     deck_builder_frame = ScrolledFrame(main_frame, autohide=True)
     deck_builder_frame.pack(fill=BOTH, expand=YES, padx=10, pady=10)
-    lb = tk.Label(deck_builder_frame, text='Deck Builder', font=('Showcard Gothic', 30, 'bold'))
-    lb.place(x=20, y=10)
-    lb.pack(padx=10, pady=20)
 
-    categories = [("Win Condition", "WinCondition", 1, 2,), ("Spells", "Spells", 1, 3), ("Mini Tanks", "MiniTanks", 0, 2), ("Buildings", "Buildings", 0, 2), ("Damage Units", "DamageUnits", 2, 4)]
+    box_frame = tk.Frame(deck_builder_frame)
+    box_frame.pack(pady=10, padx=10)
 
-    for section, category, min_val, max_val in categories:
-        category_frame = tk.Frame(deck_builder_frame)
-        category_frame.pack(pady=10, padx=10, fill=tk.X)
+    for i in range(10):
+        container_frame = tk.Frame(box_frame, width=500, height=400, bg='white', borderwidth=1, relief='solid')
+        container_frame.grid(row=i//3, column=i%3, padx=5, pady=5)
+        container_frame.pack_propagate(False)
 
-        lb = tk.Label(category_frame, text=section, font=('Showcard Gothic', 15, 'bold'))
-        lb.pack(padx=10, pady=10)
-        for i in range(15):
-            row_frame = tk.Frame(category_frame, bg="white")
-            row_frame.pack()
-            for j in range(13):
-                try:
-                    # Adjust the filename to parse elixir cost
-                    file_name = f"card_{i*13 + j + 1}.png"
-                    image_path = f"deck_builder_images/{category}/{file_name}"
+        deck_label = tk.Label(container_frame, text=f'Deck {i+1}', font=('Showcard Gothic', 16, 'bold'))
+        deck_label.pack(side='top', pady=10)
 
-                    img = Image.open(image_path)
-                    img = img.resize((90, 120), Image.LANCZOS)
-                    img = ImageTk.PhotoImage(img)
-                    panel = tk.Label(row_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
-                    panel.image = img
-                    panel.pack(side=tk.LEFT)
+        selected_images = decks[deck_label['text'].replace(" ", "_")]  # Reference the correct list for the deck
+        deck_label.bind("<Button-1>", lambda e, deck_label=deck_label, selected_images=selected_images: on_box_click(deck_label, selected_images))
 
-                    var = tk.BooleanVar()
-                    checkbutton = ttk.Checkbutton(row_frame, variable=var, command=lambda v=var, p=panel, min_val=min_val, max_val=max_val, cat=category, fname=file_name: on_checkbutton_click(v, p, min_val, max_val, cat, fname))
-                    checkbutton.pack(side=tk.LEFT, padx=5, pady=5)
+        # Update the deck display initially
+        update_deck_display(container_frame, selected_images)
 
-                except FileNotFoundError:
-                    break
+        result_button = tk.Button(container_frame, text='Result', width=10, height=1, bg='gray', fg='white')
+        result_button.pack(side='bottom', pady=20)
 
-    results_btn = tk.Button(deck_builder_frame, text="Results", command=show_results)
-    results_btn.pack(padx=10, pady=10)
+def build_deck_page(new_window, selected_image_paths, deck_name, container_frame, category=None):
+    new_window.geometry("1250x800")
+    new_window.transient(window)
 
+    def clear_frame(frame):
+        for widget in frame.winfo_children():
+            widget.destroy()
 
-num_selected = 0 
-category_counts = {
-    "WinCondition": 0,
-    "Spells": 0,
-    "MiniTanks": 0,
-    "Buildings": 0,
-    "DamageUnits": 0
-}
+    def show_categories(frame, category):
+        clear_frame(frame)
 
-elixir_category_counts = 0
+        if category == 'elixir':
+            query = """
+            SELECT elixir, filename FROM images 
+            ORDER BY 
+            CASE 
+                WHEN elixir = '1' THEN 1
+                WHEN elixir = '2' THEN 2
+                WHEN elixir = '3' THEN 3
+                WHEN elixir = '4' THEN 4 
+                WHEN elixir = '5' THEN 5
+                WHEN elixir = '6' THEN 6
+                WHEN elixir = '7' THEN 7
+                WHEN elixir = '8' THEN 8
+                WHEN elixir = '9' THEN 9
+                WHEN elixir = '10' THEN 10
+            END
+            """
+            data = get_data_from_db(query)
+        elif category == 'arena':
+            query = """
+            SELECT arena, filename FROM images 
+            ORDER BY 
+            CASE 
+                WHEN arena = '0' THEN 1
+                WHEN arena = '1' THEN 2
+                WHEN arena = '2' THEN 3
+                WHEN arena = '3' THEN 4 
+                WHEN arena = '4' THEN 5
+                WHEN arena = '5' THEN 6
+                WHEN arena = '6' THEN 7
+                WHEN arena = '7' THEN 8
+                WHEN arena = '8' THEN 9
+                WHEN arena = '9' THEN 10
+                WHEN arena = '10' THEN 11
+                WHEN arena = '11' THEN 12
+                WHEN arena = '12' THEN 13
+                WHEN arena = '13' THEN 14
+                WHEN arena = '14' THEN 15
+                WHEN arena = '15' THEN 16
+                WHEN arena = '16' THEN 17
+                WHEN arena = '17' THEN 18
+                WHEN arena = '18' THEN 19
+            END
+            """
+            data = get_data_from_db(query)
+        elif category == 'type':
+            query = """
+            SELECT type, filename FROM images 
+            ORDER BY 
+            CASE 
+                WHEN type = 'Spells' THEN 1
+                WHEN type = 'Troop' THEN 2
+                WHEN type = 'Buildings' THEN 3
+            END
+            """
+            data = get_data_from_db(query)
+        elif category == 'rarity':
+            query = """
+            SELECT rarity, filename FROM images 
+            ORDER BY 
+            CASE 
+                WHEN rarity = 'common' THEN 1
+                WHEN rarity = 'rare' THEN 2
+                WHEN rarity = 'epic' THEN 3
+                WHEN rarity = 'legendary' THEN 4
+                WHEN rarity = 'champion' THEN 5
+                WHEN rarity = 'funny' THEN 6
+            END
+            """
+            data = get_data_from_db(query)
 
-elixir_category_counts = {"WinCondition": 0, "Spells": 0, "MiniTanks": 0, "Buildings": 0, "DamageUnits": 0}
+        button_frame = tk.Frame(frame)
+        button_frame.pack(fill=tk.X, padx=10, pady=5)
 
-elixir_costs = {
-    "card_1.png": 2,
-    "card_2.png": 3,
-    "card_3.png": 3,
-    "card_4.png": 3,
-    "card_5.png": 3,
-    "card_6.png": 4,
-    "card_7.png": 4,
-    "card_8.png": 4,
-    "card_9.png": 4,
-    "card_10.png": 5,
-    "card_11.png": 5,
-    "card_12.png": 5,
-    "card_13.png": 5,
-    "card_14.png": 5,
-    "card_15.png": 6,
-    "card_16.png": 6,
-    "card_17.png": 6,
-    "card_18.png": 7,
-    "card_19.png": 7,
-    "card_20.png": 8,
-    "card_21.png": 9,
-    "card_27.png": 1,
-    "card_28.png": 2,
-    "card_29.png": 2,
-    "card_30.png": 2,
-    "card_31.png": 2,
-    "card_32.png": 2,
-    "card_33.png": 3,
-    "card_34.png": 3,
-    "card_35.png": 3,
-    "card_36.png": 3,
-    "card_37.png": 3,
-    "card_38.png": 4,
-    "card_39.png": 4,
-    "card_40.png": 4,
-    "card_41.png": 6,
-    "card_42.png": 6,
-    "card_53.png": 2,
-    "card_54.png": 3,
-    "card_55.png": 3,
-    "card_56.png": 3,
-    "card_57.png": 3,
-    "card_58.png": 4,
-    "card_59.png": 4,
-    "card_60.png": 4,
-    "card_61.png": 4,
-    "card_62.png": 4,
-    "card_63.png": 4,
-    "card_64.png": 4,
-    "card_65.png": 4,
-    "card_66.png": 4,
-    "card_67.png": 4,
-    "card_68.png": 5,
-    "card_69.png": 5,
-    "card_70.png": 5,
-    "card_71.png": 5,
-    "card_72.png": 5,
-    "card_73.png": 6,
-    "card_79.png": 3,
-    "card_80.png": 3,
-    "card_81.png": 4,
-    "card_82.png": 4,
-    "card_83.png": 4,
-    "card_84.png": 4,
-    "card_85.png": 5,
-    "card_86.png": 5,
-    "card_87.png": 6,
-    "card_88.png": 7,
-    "card_92.png": 1,
-    "card_93.png": 1,
-    "card_94.png": 1,
-    "card_95.png": 1,
-    "card_96.png": 1,
-    "card_97.png": 2,
-    "card_98.png": 2,
-    "card_99.png": 2,
-    "card_100.png": 2,
-    "card_101.png": 3,
-    "card_102.png": 3,
-    "card_103.png": 3,
-    "card_104.png": 3,
-    "card_105.png": 3,
-    "card_106.png": 3,
-    "card_107.png": 3,
-    "card_108.png": 3,
-    "card_109.png": 3,
-    "card_110.png": 3,
-    "card_111.png": 3,
-    "card_112.png": 4,
-    "card_113.png": 4,
-    "card_114.png": 4,
-    "card_115.png": 4,
-    "card_116.png": 4,
-    "card_117.png": 4,
-    "card_118.png": 4,
-    "card_119.png": 4,
-    "card_120.png": 4,
-    "card_121.png": 4,
-    "card_122.png": 4,
-    "card_123.png": 5,
-    "card_124.png": 5,
-    "card_125.png": 5,
-    "card_126.png": 5,
-    "card_127.png": 5,
-    "card_128.png": 5,
-    "card_129.png": 6,
-    "card_130.png": 6,
-    "card_131.png": 7,
-    "card_132.png": 7,
-    "card_133.png": 7,
-}
+        type_button = ttk.Button(button_frame, text='Type', command=lambda: show_categories(frame, 'type'))
+        type_button.pack(side=tk.LEFT, padx=5)
 
-def on_checkbutton_click(var, panel, min_val, max_val, category, file_name):
-    global num_selected, category_counts, elixir_category_counts
-    if var.get():
-        
-        if num_selected >= 8:
-            messagebox.showwarning("Limit Exceeded", "You can only select up to 8 cards.")
-            var.set(False)
-            return
+        arena_button = ttk.Button(button_frame, text='Arena', command=lambda: show_categories(frame, 'arena'))
+        arena_button.pack(side=tk.LEFT, padx=5)
 
-        elixir_cost = elixir_costs[file_name]  # Get the elixir cost from the dictionary
-        elixir_category_counts[category] += elixir_cost
-        category_counts[category] += 1
-        num_selected += 1
-        panel.config(state='normal')
-    else:
-        elixir_cost = elixir_costs[file_name]  # Get the elixir cost from the dictionary
-        elixir_category_counts[category] -= elixir_cost
-        category_counts[category] -= 1
-        num_selected -= 1
-        panel.config(state='normal')
+        elixir_button = ttk.Button(button_frame, text='Elixir', command=lambda: show_categories(frame, 'elixir'))
+        elixir_button.pack(side=tk.LEFT, padx=5)
 
-def show_results():
-    if num_selected < 8:
-        messagebox.showwarning("Warning", "You must select 8 cards!")
-    else:
-        total_elixir = sum(elixir_category_counts.values())
-        average_elixir = total_elixir / 8
-        results = []
-        categories = [("Win Condition", "WinCondition", 1, 2), ("Spells", "Spells", 1, 3), ("Mini Tanks", "MiniTanks", 0, 2), ("Buildings", "Buildings", 0, 2), ("Damage Units", "DamageUnits", 2, 4)]
+        rarity_button = ttk.Button(button_frame, text='Rarity', command=lambda: show_categories(frame, 'rarity'))
+        rarity_button.pack(side=tk.LEFT, padx=5)
 
-        feedback = ""
-        if 0.1 <= average_elixir <= 2.0:
-            feedback = "You're a fast cycle guy"
-        elif 2.1 <= average_elixir <= 3.2:
-            feedback = "You're either using 2.6 hog or 2.9 mortar"
-        elif 3.3 <= average_elixir <= 4.1:
-            feedback = "You're not dependent on cycle decks now"
-        elif 4.2 <= average_elixir <= 4.7:
-            feedback = "Woah, that's a bit too expensive"
-        elif 4.8 <= average_elixir <= 5.6:
-            feedback = "Are you trolling at this point?"
-        else:
-            feedback = "I'm certain you're playing 7x elixir"
+        category_frame = ScrolledFrame(frame, autohide=True)
+        category_frame.pack(fill=tk.BOTH, expand=tk.YES, padx=10, pady=10)
+    
+        current_title = None
+        row = 0
+        col = 0
 
-        for section, category, min_val, max_val, in categories:
-            if category_counts[category] < min_val or category_counts[category] > max_val:
-                results.append(f"{section}: bad")
+        for title, filename in data:
+            if title != current_title:
+                if current_title is not None:
+                    row += 1  
+                current_title = title
+                title_label = tk.Label(category_frame, text=current_title, font=("Showcard Gothic", 16, "bold"))
+                title_label.grid(row=row, column=0, columnspan=13, pady=(10, 0), sticky="w")
+                row += 1
+                col = 0
+
+            img_path = os.path.join("clash-royale-card-elixir", filename)
+
+            if os.path.isfile(img_path):
+                img = Image.open(img_path)
+                img = img.resize((90, 120), Image.LANCZOS)
+                img = ImageTk.PhotoImage(img)
+
+                panel = tk.Label(category_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
+                panel.image = img
+                panel.grid(row=row, column=col, sticky="w")
+
+                panel.bind("<Button-1>", lambda event, img_path=img_path: on_image_click(event, img_path))
+
+                col += 1
+                if col >= 13:
+                    row += 1
+                    col = 0
+
+        def on_image_click(event, img_path):
+            if img_path not in selected_image_paths:
+                if len(selected_image_paths) < 8:
+                    selected_image_paths.append(img_path)
+                    row, col = 0, 0
+                    clear_frame(deck_frame)
+                    for img_path in selected_image_paths:
+                        img = Image.open(img_path)
+                        img = img.resize((90, 120), Image.LANCZOS)
+                        img = ImageTk.PhotoImage(img)
+
+                        panel = tk.Label(deck_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
+                        panel.image = img
+                        panel.grid(row=row, column=col)
+
+                        col += 1
+                        if col >= 13:
+                            col = 0
+                            row += 1
+
+                        panel.bind("<Button-1>", lambda event, img_path=img_path: remove_image_from_deck(event, img_path))
+                else:
+                    messagebox.showwarning("Limit Reached", "You can only choose 8 cards.")
             else:
-                results.append(f"{section}: good")
+                messagebox.showwarning("Repeated Card", "You have already chosen this card.")
 
-        messagebox.showinfo("Results", "\n".join(results) + "\n" + "\n" + "Average Elixir: {:.2f}\nFeedback: {}".format(average_elixir, feedback))
+        def remove_image_from_deck(event, img_path):
+            selected_image_paths.remove(img_path)
+            row, col = 0, 0
+            clear_frame(deck_frame)
+            for img_path in selected_image_paths:
+                img = Image.open(img_path)
+                img = img.resize((90, 120), Image.LANCZOS)
+                img = ImageTk.PhotoImage(img)
+
+                panel = tk.Label(deck_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
+                panel.image = img
+                panel.grid(row=row, column=col)
+
+                col += 1
+                if col >= 13:
+                    col = 0
+                    row += 1
+
+                panel.bind("<Button-1>", lambda event, img_path=img_path: remove_image_from_deck(event, img_path))
+
+        def save_deck():
+            decks[deck_name] = list(selected_image_paths)  # Update the correct deck with the selected images
+            messagebox.showinfo("Success", f"{deck_name} has been saved with {len(selected_image_paths)} cards.")
+            update_deck_display(container_frame, selected_image_paths)
+
+        def clear_deck():
+            selected_image_paths.clear()
+            clear_frame(deck_frame)
+            
+        deck_frame = tk.Frame(new_window)
+        deck_frame.pack(side=BOTTOM, fill=X)
+
+        save_button = tk.Button(button_frame, text="Save", command=save_deck)
+        save_button.pack(side=RIGHT, padx=10)
+
+        clear_button = tk.Button(button_frame, text='Clear', command=clear_deck)
+        clear_button.pack(side=RIGHT, padx=10)
+        
+    if category:
+        show_categories(new_window, category)
+    else:
+        show_categories(new_window, 'rarity')
+
+def display_deck_images(container_frame, selected_image_paths):
+    def clear_frame(frame):
+        for widget in frame.winfo_children():
+            widget.destroy()
+    clear_frame(container_frame)
+    row, col = 0, 0
+    row_frame = tk.Frame(container_frame)
+    row_frame.pack(pady=5)
+    for img_path in selected_image_paths:
+        img = Image.open(img_path)
+        img = img.resize((90, 120), Image.LANCZOS)
+        img = ImageTk.PhotoImage(img)
+
+        box = tk.Frame(row_frame, width=90, height=120, bg='lightgray', borderwidth=1, relief='solid')
+        box.pack(side='left', padx=5)
+        box.pack_propagate(False)
+
+        label = tk.Label(box, image=img)
+        label.image = img
+        label.pack(expand=True)
+
+        col += 1
+        if col >= 4:
+            row_frame = tk.Frame(container_frame)
+            row_frame.pack(pady=5)
+            col = 0
 
 def save_card_to_file(name, elixir, card_type, arena, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius, image_path=None):
     if not name or not elixir or not card_type or not arena or not description:
