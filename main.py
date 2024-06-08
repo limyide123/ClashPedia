@@ -236,6 +236,7 @@ def clear_main_frame(frame=None):
     if frame:
         for widget in frame.winfo_children():
             widget.destroy()
+            
     else:
         for widget in main_frame.winfo_children():
             widget.destroy()
