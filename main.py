@@ -505,24 +505,24 @@ def update_deck_display(container_frame, selected_images):
     for widget in container_frame.winfo_children():
         if isinstance(widget, tk.Frame) and not any(isinstance(w, tk.Label) for w in widget.winfo_children()):
             widget.destroy()
-            
+
     row_frame = tk.Frame(container_frame)
     row_frame.pack(pady=5)
     col = 0
-    
+
     for img_path in selected_images:
         img = Image.open(img_path)
         img = img.resize((90, 120), Image.LANCZOS)
         img = ImageTk.PhotoImage(img)
-        
+
         box = tk.Frame(row_frame, width=90, height=120, bg='lightgray', borderwidth=1, relief='solid')
         box.pack(side='left', padx=5)
         box.pack_propagate(False)
-        
+
         label = tk.Label(box, image=img)
         label.image = img
         label.pack(expand=True)
-        
+
         col += 1
         if col >= 4:
             row_frame = tk.Frame(container_frame)
@@ -565,9 +565,8 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
         for widget in frame.winfo_children():
             widget.destroy()
 
-    def show_categories(category):
-
-        clear_main_frame()
+    def show_categories(frame, category):
+        clear_frame(frame)
 
         if category == 'elixir':
 
@@ -666,7 +665,9 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
 
             data = get_data_from_db(query)
 
-            titles = ["Spells", "Troop", "Buildings"]
+            titles = ["Spells",
+                    "Troop",
+                    "Buildings"]
 
         elif category == 'rarity':
 
@@ -692,24 +693,23 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
                     "champion",
                     "funny"]
 
-        button_frame = tk.Frame(main_frame)
+        button_frame = tk.Frame(frame)
         button_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        type_button = ttk.Button(button_frame, text='Type', command=lambda: show_categories('type'))
+        type_button = ttk.Button(button_frame, text='Type', command=lambda: show_categories(frame, 'type'))
         type_button.pack(side=tk.LEFT, padx=5)
 
-        arena_button = ttk.Button(button_frame, text='Arena', command=lambda: show_categories('arena'))
+        arena_button = ttk.Button(button_frame, text='Arena', command=lambda: show_categories(frame, 'arena'))
         arena_button.pack(side=tk.LEFT, padx=5)
 
-        elixir_button = ttk.Button(button_frame, text='Elixir', command=lambda: show_categories('elixir'))
+        elixir_button = ttk.Button(button_frame, text='Elixir', command=lambda: show_categories(frame, 'elixir'))
         elixir_button.pack(side=tk.LEFT, padx=5)
 
-        rarity_button = ttk.Button(button_frame, text='Rarity', command=lambda: show_categories('rarity'))
+        rarity_button = ttk.Button(button_frame, text='Rarity', command=lambda: show_categories(frame, 'rarity'))
         rarity_button.pack(side=tk.LEFT, padx=5)
 
-        category_frame = ScrolledFrame(main_frame, autohide=True)
+        category_frame = ScrolledFrame(frame, autohide=True)
         category_frame.pack(fill=tk.BOTH, expand=tk.YES, padx=10, pady=10)
-        
 
         current_title = None
         row = 0
@@ -797,7 +797,7 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
         def clear_deck():
             selected_image_paths.clear()
             clear_frame(deck_frame)
-            
+
         deck_frame = tk.Frame(new_window)
         deck_frame.pack(side=BOTTOM, fill=X)
 
