@@ -341,7 +341,9 @@ def show_categories(category):
 
         data = get_data_from_db(query)
 
-        titles = ["Spells", "Troop", "Buildings"]
+        titles = ["Spells",
+                  "Troop",
+                  "Buildings"]
 
     elif category == 'rarity':
 
