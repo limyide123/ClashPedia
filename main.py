@@ -236,6 +236,7 @@ def clear_main_frame(frame=None):
     if frame:
         for widget in frame.winfo_children():
             widget.destroy()
+            
     else:
         for widget in main_frame.winfo_children():
             widget.destroy()
@@ -330,18 +331,20 @@ def show_categories(category):
     elif category == 'type':
 
         query = """
-        SELECT card_type, image_path FROM profile_cards 
+        SELECT type, filename FROM images 
         ORDER BY 
         CASE 
-            WHEN type = 'Spell' THEN 1
+            WHEN type = 'Spells' THEN 1
             WHEN type = 'Troop' THEN 2
-            WHEN type = 'Building' THEN 3
+            WHEN type = 'Buildings' THEN 3
         END
         """
 
         data = get_data_from_db(query)
 
-        titles = ["Spells", "Troop", "Buildings"]
+        titles = ["Spells",
+                  "Troop",
+                  "Buildings"]
 
     elif category == 'rarity':
 
@@ -562,12 +565,14 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
         for widget in frame.winfo_children():
             widget.destroy()
 
-    def show_categories(frame, category):
-        clear_frame(frame)
+    def show_categories(category):
+
+        clear_main_frame()
 
         if category == 'elixir':
+
             query = """
-            SELECT elixir, image_path FROM profile_cards 
+            SELECT elixir, image_path FROM profile_cards
             ORDER BY 
             CASE 
                 WHEN elixir = '1' THEN 1
@@ -582,8 +587,23 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
                 WHEN elixir = '10' THEN 10
             END
             """
+
             data = get_data_from_db(query)
+
+            titles = ["Elixir_1",
+                    "Elixir_2",
+                    "Elixir_3",
+                    "Elixir_4",
+                    "Elixir_5",
+                    "Elixir_6",
+                    "Elixir_7",
+                    "Elixir_8",
+                    "Elixir_9",
+                    "Elixir_10"
+                    ]
+            
         elif category == 'arena':
+
             query = """
             SELECT arena, image_path FROM profile_cards
             ORDER BY 
@@ -609,19 +629,47 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
                 WHEN arena = '18' THEN 19
             END
             """
+
             data = get_data_from_db(query)
+
+            titles = ["Arena 0",
+                    "Arena 1",
+                    "Arena 2",
+                    "Arena 3",
+                    "Arena 4",
+                    "Arena 5",
+                    "Arena 6",
+                    "Arena 7",
+                    "Arena 8",
+                    "Arena 9",
+                    "Arena 10",
+                    "Arena 11",
+                    "Arena 12", 
+                    "Arena 13",
+                    "Arena 14",
+                    "Arena 15",
+                    "Arena 16",
+                    "Arena 17",
+                    "Arena 18",]
+            
         elif category == 'type':
+
             query = """
-            SELECT card_type, image_path FROM profile_cards
+            SELECT type, filename FROM images 
             ORDER BY 
             CASE 
-                WHEN type = 'Spell' THEN 1
+                WHEN type = 'Spells' THEN 1
                 WHEN type = 'Troop' THEN 2
-                WHEN type = 'Building' THEN 3
+                WHEN type = 'Buildings' THEN 3
             END
             """
+
             data = get_data_from_db(query)
+
+            titles = ["Spells", "Troop", "Buildings"]
+
         elif category == 'rarity':
+
             query = """
             SELECT rarity, image_path FROM profile_cards
             ORDER BY 
@@ -634,26 +682,35 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
                 WHEN rarity = 'funny' THEN 6
             END
             """
+
             data = get_data_from_db(query)
 
-        button_frame = tk.Frame(frame)
+            titles = ["common",
+                    "rare",
+                    "epic",
+                    "legendary",
+                    "champion",
+                    "funny"]
+
+        button_frame = tk.Frame(main_frame)
         button_frame.pack(fill=tk.X, padx=10, pady=5)
 
-        type_button = ttk.Button(button_frame, text='Type', command=lambda: show_categories(frame, 'type'))
+        type_button = ttk.Button(button_frame, text='Type', command=lambda: show_categories('type'))
         type_button.pack(side=tk.LEFT, padx=5)
 
-        arena_button = ttk.Button(button_frame, text='Arena', command=lambda: show_categories(frame, 'arena'))
+        arena_button = ttk.Button(button_frame, text='Arena', command=lambda: show_categories('arena'))
         arena_button.pack(side=tk.LEFT, padx=5)
 
-        elixir_button = ttk.Button(button_frame, text='Elixir', command=lambda: show_categories(frame, 'elixir'))
+        elixir_button = ttk.Button(button_frame, text='Elixir', command=lambda: show_categories('elixir'))
         elixir_button.pack(side=tk.LEFT, padx=5)
 
-        rarity_button = ttk.Button(button_frame, text='Rarity', command=lambda: show_categories(frame, 'rarity'))
+        rarity_button = ttk.Button(button_frame, text='Rarity', command=lambda: show_categories('rarity'))
         rarity_button.pack(side=tk.LEFT, padx=5)
 
-        category_frame = ScrolledFrame(frame, autohide=True)
+        category_frame = ScrolledFrame(main_frame, autohide=True)
         category_frame.pack(fill=tk.BOTH, expand=tk.YES, padx=10, pady=10)
-    
+        
+
         current_title = None
         row = 0
         col = 0
