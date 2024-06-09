@@ -452,49 +452,65 @@ def categories_page(category=None):
 
 
 def show_image(event, image_path):
+    print(f"Image path: {image_path}") 
+
     image_window = tk.Toplevel()
     image_window.title("Card Image")
-    image_window.geometry("300x400")
+    image_window.geometry("600x900")
 
     img = Image.open(image_path)
-    img = img.resize((300, 400), Image.LANCZOS)
+    img = img.resize((150, 200), Image.LANCZOS)
     img = ImageTk.PhotoImage(img)
 
     image_label = tk.Label(image_window, image=img)
     image_label.image = img
-    image_label.pack(padx=20, pady=20)
-    
+    image_label.pack(pady=10)
+
+    card_details_frame = ttk.Frame(image_window)
+    card_details_frame.pack(padx=20, pady=(0, 20), fill=tk.X)
+
     conn = sqlite3.connect('clash_royale.db')
     cursor = conn.cursor()
 
     cursor.execute('''
-    SELECT pc.*, img.*
-    FROM profile_cards pc
-    JOIN images img ON pc.image_id = img.image_id
-    WHERE img.image_path = ?
-    ''', (image_path,))
-    
+        SELECT name, rarity, elixir, card_type, arena, description, hitpoints, damage, 
+               card_range, stun_duration, shield, movement_speed, radius
+        FROM profile_cards
+        WHERE image_path = ?
+    ''', (os.path.basename(image_path),))
     card_data = cursor.fetchone()
     conn.close()
 
+    print(f"Card data: {card_data}")  
+
+    label_font = ("Showcard Gothic", 8)
+    value_font = ("Arial", 8, "bold")
+
     if card_data:
-        card_info_frame = tk.Frame(image_window)
-        card_info_frame.pack(pady=10)
+        labels = [
+            "Name", "Rarity", "Elixir", "Card Type", "Arena", "Description", 
+            "Hitpoints", "Damage", "Card Range", "Stun Duration", "Shield", 
+            "Movement Speed", "Radius"
+        ]
 
-        labels = ["Name:", "Rarity:", "Elixir:", "Type:", "Arena:", "Description:", "Hitpoints:", "Damage:", "Card Range:",
-                  "Stun Duration:", "Shield:", "Movement Speed:", "Radius:"]
+        for i, (label, value) in enumerate(zip(labels, card_data)):
+            label_widget = ttk.Label(card_details_frame, text=f"{label}:", font=label_font)
+            label_widget.grid(row=i*2, column=0, sticky="w", padx=(0, 10), pady=5)
 
-        for i, label_text in enumerate(labels):
-            label = tk.Label(card_info_frame, text=label_text)
-            label.grid(row=i, column=0, padx=5, pady=5, sticky="w")
+            if label == "Description":
+                value_widget = ttk.Label(card_details_frame, text=value, font=value_font, wraplength=400)  # Adjust wraplength as needed
+            else:
+                value_widget = ttk.Label(card_details_frame, text=value, font=value_font)
+                
+            value_widget.grid(row=i*2, column=1, sticky="w", padx=(0, 10), pady=5)
 
-            data_label = tk.Label(card_info_frame, text=str(card_data[i+1]))
-            data_label.grid(row=i, column=1, padx=5, pady=5, sticky="w")
+            # Add a separator line
+            separator = ttk.Separator(card_details_frame, orient='horizontal')
+            separator.grid(row=i*2 + 1, column=0, columnspan=2, sticky='ew', pady=(5, 5))
 
-        # Adjust column weights
-        card_info_frame.columnconfigure(0, weight=1)
-        card_info_frame.columnconfigure(1, weight=1)
-
+    else:
+        error_label = ttk.Label(card_details_frame, text="No data found for this card.", font=label_font)
+        error_label.grid(row=0, column=0, sticky="w", padx=(0, 10), pady=5)
 
 
 # Global dictionary to store image paths for each deck
