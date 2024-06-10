@@ -667,6 +667,7 @@ def result_page(result_name):
             # Add a blank space if there are no images for this category
             blank_space = tk.Label(row_frame, text=" \n\n\n\n")
             blank_space.pack(side=tk.LEFT, padx=5)
+            
         else:
             for path in paths:
                 img = Image.open(path)
