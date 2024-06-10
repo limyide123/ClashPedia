@@ -333,15 +333,15 @@ def show_categories(category):
         SELECT card_type, image_path FROM profile_cards 
         ORDER BY 
         CASE 
-            WHEN type = 'Spell' THEN 1
-            WHEN type = 'Troop' THEN 2
-            WHEN type = 'Building' THEN 3
+            WHEN card_type = 'Spell' THEN 1
+            WHEN card_type = 'Troop' THEN 2
+            WHEN card_type = 'Building' THEN 3
         END
         """
 
         data = get_data_from_db(query)
 
-        titles = ["Spells", "Troop", "Buildings"]
+        titles = ["Spell", "Troop", "Building"]
 
     elif category == 'rarity':
 
