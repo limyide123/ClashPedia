@@ -724,6 +724,7 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
             END
             """
             data = get_data_from_db(query)
+            
         elif category == 'arena':
             query = """
             SELECT arena, image_path FROM profile_cards
@@ -751,6 +752,7 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
             END
             """
             data = get_data_from_db(query)
+
         elif category == 'type':
             query = """
             SELECT card_type, image_path FROM profile_cards
@@ -762,6 +764,7 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
             END
             """
             data = get_data_from_db(query)
+
         elif category == 'rarity':
             query = """
             SELECT rarity, image_path FROM profile_cards
@@ -874,9 +877,14 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
                 panel.bind("<Button-1>", lambda event, img_path=img_path: remove_image_from_deck(event, img_path))
 
         def save_deck():
-            decks[deck_name] = list(selected_image_paths)  # Update the correct deck with the selected images
+
+            if len(selected_image_paths) != 8:
+                messagebox.showwarning("Invalid Deck", "You must choose exactly 8 cards.")
+                return
+            
+            decks[deck_name] = list(selected_image_paths)
             result_name = f"Result_{deck_name.split('_')[1]}"
-            results[result_name] = list(selected_image_paths)  # Save the selected images for the result page
+            results[result_name] = list(selected_image_paths)
             messagebox.showinfo("Success", f"{deck_name} has been saved with {len(selected_image_paths)} cards.")
             update_deck_display(container_frame, selected_image_paths)
 
