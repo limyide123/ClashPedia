@@ -663,20 +663,26 @@ def result_page(result_name):
         row_frame.pack(pady=5)
         col = 0
 
-        for path in paths:
-            img = Image.open(path)
-            img = img.resize((90, 120), Image.LANCZOS)
-            img = ImageTk.PhotoImage(img)
+        if not paths:
+            # Add a blank space if there are no images for this category
+            blank_space = tk.Label(row_frame, text=" \n\n\n\n")
+            blank_space.pack(side=tk.LEFT, padx=5)
+            
+        else:
+            for path in paths:
+                img = Image.open(path)
+                img = img.resize((90, 120), Image.LANCZOS)
+                img = ImageTk.PhotoImage(img)
 
-            panel = tk.Label(row_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
-            panel.image = img
-            panel.pack(side=tk.LEFT, padx=5)
+                panel = tk.Label(row_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
+                panel.image = img
+                panel.pack(side=tk.LEFT, padx=5)
 
-            col += 1
-            if col >= 5:
-                row_frame = tk.Frame(frames[category])
-                row_frame.pack(pady=5)
-                col = 0
+                col += 1
+                if col >= 8:
+                    row_frame = tk.Frame(frames[category])
+                    row_frame.pack(pady=5)
+                    col = 0
 
     if elixir_values:
         average_elixir = sum(elixir_values) / len(elixir_values)
