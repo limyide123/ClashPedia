@@ -724,6 +724,7 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
             END
             """
             data = get_data_from_db(query)
+            
         elif category == 'arena':
             query = """
             SELECT arena, image_path FROM profile_cards
@@ -751,6 +752,7 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
             END
             """
             data = get_data_from_db(query)
+
         elif category == 'type':
             query = """
             SELECT card_type, image_path FROM profile_cards
@@ -762,6 +764,7 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
             END
             """
             data = get_data_from_db(query)
+
         elif category == 'rarity':
             query = """
             SELECT rarity, image_path FROM profile_cards
