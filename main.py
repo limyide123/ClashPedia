@@ -49,7 +49,8 @@ def setup_database():
         shield TEXT,
         movement_speed TEXT,
         radius REAL,
-        image_path TEXT
+        image_path TEXT,
+        property TEXT
     )
     ''')
 
@@ -236,6 +237,7 @@ def clear_main_frame(frame=None):
     if frame:
         for widget in frame.winfo_children():
             widget.destroy()
+            
     else:
         for widget in main_frame.winfo_children():
             widget.destroy()
@@ -330,18 +332,20 @@ def show_categories(category):
     elif category == 'type':
 
         query = """
-        SELECT card_type, image_path FROM profile_cards 
+        SELECT type, filename FROM images 
         ORDER BY 
         CASE 
-            WHEN card_type = 'Spell' THEN 1
-            WHEN card_type = 'Troop' THEN 2
-            WHEN card_type = 'Building' THEN 3
+            WHEN type = 'Spells' THEN 1
+            WHEN type = 'Troop' THEN 2
+            WHEN type = 'Buildings' THEN 3
         END
         """
 
         data = get_data_from_db(query)
 
-        titles = ["Spell", "Troop", "Building"]
+        titles = ["Spells",
+                  "Troop",
+                  "Buildings"]
 
     elif category == 'rarity':
 
@@ -518,24 +522,24 @@ def update_deck_display(container_frame, selected_images):
     for widget in container_frame.winfo_children():
         if isinstance(widget, tk.Frame) and not any(isinstance(w, tk.Label) for w in widget.winfo_children()):
             widget.destroy()
-            
+
     row_frame = tk.Frame(container_frame)
     row_frame.pack(pady=5)
     col = 0
-    
+
     for img_path in selected_images:
         img = Image.open(img_path)
         img = img.resize((90, 120), Image.LANCZOS)
         img = ImageTk.PhotoImage(img)
-        
+
         box = tk.Frame(row_frame, width=90, height=120, bg='lightgray', borderwidth=1, relief='solid')
         box.pack(side='left', padx=5)
         box.pack_propagate(False)
-        
+
         label = tk.Label(box, image=img)
         label.image = img
         label.pack(expand=True)
-        
+
         col += 1
         if col >= 4:
             row_frame = tk.Frame(container_frame)
@@ -567,8 +571,129 @@ def deck_builder_page():
         # Update the deck display initially
         update_deck_display(container_frame, selected_images)
 
-        result_button = tk.Button(container_frame, text='Result', width=10, height=1, bg='gray', fg='white')
+        result_button = tk.Button(container_frame, text=f'Result {i+1}', width=10, height=1, bg='gray', fg='white')
         result_button.pack(side='bottom', pady=20)
+        result_button.bind("<Button-1>", lambda e, result_name=f'Result_{i+1}': result_page(result_name))
+
+
+
+def result_page(result_name):
+    result_window = tk.Toplevel(window)
+    result_window.title(f'{result_name} - Result')
+    result_window.geometry('1200x1000')
+
+    def get_card_properties(image_paths):
+        conn = sqlite3.connect('clash_royale.db')
+        cursor = conn.cursor()
+
+        card_properties = {}
+        for path in image_paths:
+            cursor.execute("""
+                SELECT
+                    property,
+                    (CASE
+                        WHEN property IN ('win_conditions') THEN 'Win Conditions'
+                        WHEN property IN ('spells') THEN 'Spells'
+                        WHEN property IN ('buildings') THEN 'Buildings'
+                        WHEN property IN ('mini_tanks') THEN 'Mini Tanks'
+                        WHEN property IN ('damage_units') THEN 'Damage Units'
+                     END) as category,
+                    elixir
+                FROM profile_cards
+                WHERE image_path=?""", (os.path.basename(path),))
+            result = cursor.fetchone()
+            if result:
+                card_properties[path] = (result[1], result[2])
+
+        conn.close()
+        return card_properties
+
+    selected_image_paths = results[result_name]
+    card_properties = get_card_properties(selected_image_paths)
+
+    categories = {
+        'Win Conditions': [],
+        'Spells': [],
+        'Buildings': [],
+        'Mini Tanks': [],
+        'Damage Units': []
+    }
+
+    elixir_values = []
+
+    for path, (category, elixir) in card_properties.items():
+        if category in categories:
+            categories[category].append(path)
+            elixir_values.append(elixir)
+
+    frames = {}
+
+    # Evaluation of the deck
+    evaluation = {
+        'Win Conditions': (1, 2),
+        'Spells': (1, 3),
+        'Mini Tanks': (0, 2),
+        'Buildings': (0, 2),
+        'Damage Units': (2, 4)
+    }
+
+    evaluations = {}
+    for category, (min_count, max_count) in evaluation.items():
+        count = len(categories[category])
+        result = "-     Good" if min_count <= count <= max_count else "-     Bad"
+        evaluations[category] = result
+
+    for category in categories:
+        frame = tk.Frame(result_window)
+        frame.pack(fill=tk.X, pady=5)
+        
+        title_frame = tk.Frame(frame)
+        title_frame.pack(fill=tk.X)
+        
+        title = tk.Label(title_frame, text=category, font=("Showcard Gothic", 16, "bold"))
+        title.pack(side=tk.LEFT, anchor="w", padx=10)
+        
+        result_label = tk.Label(title_frame, text=f"{evaluations[category]}", font=("Showcard Gothic", 12, "bold"))
+        result_label.pack(side=tk.LEFT, padx=10)
+        
+        frames[category] = frame
+
+    for category, paths in categories.items():
+        row_frame = tk.Frame(frames[category])
+        row_frame.pack(pady=5)
+        col = 0
+
+        if not paths:
+            # Add a blank space if there are no images for this category
+            blank_space = tk.Label(row_frame, text=" \n\n\n\n")
+            blank_space.pack(side=tk.LEFT, padx=5)
+            
+        else:
+            for path in paths:
+                img = Image.open(path)
+                img = img.resize((90, 120), Image.LANCZOS)
+                img = ImageTk.PhotoImage(img)
+
+                panel = tk.Label(row_frame, image=img, compound=tk.LEFT, bd=0, padx=5, pady=5)
+                panel.image = img
+                panel.pack(side=tk.LEFT, padx=5)
+
+                col += 1
+                if col >= 8:
+                    row_frame = tk.Frame(frames[category])
+                    row_frame.pack(pady=5)
+                    col = 0
+
+    if elixir_values:
+        average_elixir = sum(elixir_values) / len(elixir_values)
+        avg_elixir_label = tk.Label(result_window, text=f"Average Elixir: {average_elixir:.2f}", font=("Showcard Gothic", 16, "bold"))
+        avg_elixir_label.pack(pady=10)
+    else:
+        avg_elixir_label = tk.Label(result_window, text="Average Elixir: N/A", font=("Showcard Gothic", 16, "bold"))
+        avg_elixir_label.pack(pady=10)
+
+# Global dictionary to store image paths for each result page
+results = {f"Result_{i+1}": [] for i in range(10)}
 
 def build_deck_page(new_window, selected_image_paths, deck_name, container_frame, category=None):
     new_window.geometry("1250x800")
@@ -599,6 +724,7 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
             END
             """
             data = get_data_from_db(query)
+            
         elif category == 'arena':
             query = """
             SELECT arena, image_path FROM profile_cards
@@ -626,17 +752,19 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
             END
             """
             data = get_data_from_db(query)
+
         elif category == 'type':
             query = """
             SELECT card_type, image_path FROM profile_cards
             ORDER BY 
             CASE 
-                WHEN type = 'Spell' THEN 1
-                WHEN type = 'Troop' THEN 2
-                WHEN type = 'Building' THEN 3
+                WHEN card_type = 'Spell' THEN 1
+                WHEN card_type = 'Troop' THEN 2
+                WHEN card_type = 'Building' THEN 3
             END
             """
             data = get_data_from_db(query)
+
         elif category == 'rarity':
             query = """
             SELECT rarity, image_path FROM profile_cards
@@ -749,7 +877,14 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
                 panel.bind("<Button-1>", lambda event, img_path=img_path: remove_image_from_deck(event, img_path))
 
         def save_deck():
-            decks[deck_name] = list(selected_image_paths)  # Update the correct deck with the selected images
+
+            if len(selected_image_paths) != 8:
+                messagebox.showwarning("Invalid Deck", "You must choose exactly 8 cards.")
+                return
+            
+            decks[deck_name] = list(selected_image_paths)
+            result_name = f"Result_{deck_name.split('_')[1]}"
+            results[result_name] = list(selected_image_paths)
             messagebox.showinfo("Success", f"{deck_name} has been saved with {len(selected_image_paths)} cards.")
             update_deck_display(container_frame, selected_image_paths)
 
@@ -771,34 +906,7 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
     else:
         show_categories(new_window, 'rarity')
 
-def display_deck_images(container_frame, selected_image_paths):
-    def clear_frame(frame):
-        for widget in frame.winfo_children():
-            widget.destroy()
-    clear_frame(container_frame)
-    row, col = 0, 0
-    row_frame = tk.Frame(container_frame)
-    row_frame.pack(pady=5)
-    for img_path in selected_image_paths:
-        img = Image.open(img_path)
-        img = img.resize((90, 120), Image.LANCZOS)
-        img = ImageTk.PhotoImage(img)
-
-        box = tk.Frame(row_frame, width=90, height=120, bg='lightgray', borderwidth=1, relief='solid')
-        box.pack(side='left', padx=5)
-        box.pack_propagate(False)
-
-        label = tk.Label(box, image=img)
-        label.image = img
-        label.pack(expand=True)
-
-        col += 1
-        if col >= 4:
-            row_frame = tk.Frame(container_frame)
-            row_frame.pack(pady=5)
-            col = 0
-
-def save_card_to_file(name, rarity, elixir, card_type, arena, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius, image_path=None):
+def save_card_to_file(name, rarity, elixir, card_type, arena, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius, image_path):
     if not name or not rarity or not elixir or not card_type or not arena or not description:
         messagebox.showwarning("Input Error", "Name, Rarity, Elixir, Type, Arena, and Description are required fields.")
         return
@@ -827,12 +935,12 @@ def save_card_to_file(name, rarity, elixir, card_type, arena, description, hitpo
 
     messagebox.showinfo("Success", "Card saved successfully.")
 
-def upload_image():
-    root = Tk()
+def upload_image(image_path_var):
+    root = tk.Tk()
     root.withdraw()  # Hide the main window
     file_path = filedialog.askopenfilename(title="Select an image", filetypes=[('Image files', '*.png *.jpg *.jpeg')])
     root.destroy()  # Close the file explorer window
-    return file_path
+    image_path_var.set(file_path)  # Set the file path in the variable
 
 
 def profile_maker_page():
@@ -910,6 +1018,8 @@ def profile_maker_page():
     radius_entry = tk.Entry(form_frame)
     radius_entry.grid(row=12, column=1, padx=5, pady=5)
 
+    image_path_var = tk.StringVar()
+    
     save_button = tk.Button(form_frame, text="Save", command=lambda: save_card_to_file(
         name_entry.get(),
         rarity_entry.get(),
@@ -923,14 +1033,15 @@ def profile_maker_page():
         stun_duration_entry.get(),
         shield_entry.get(),
         movement_speed_entry.get(),
-        radius_entry.get()
+        radius_entry.get(),
+        image_path_var.get() 
     ))
     save_button.grid(row=13, column=0, columnspan=2, pady=10)
 
-    upload_button = ttk.Button(form_frame, text="Upload Image", command=upload_image)
+    upload_button = ttk.Button(form_frame, text="Upload Image", command=lambda: upload_image(image_path_var))
     upload_button.grid(row=14, column=1, padx=5)
 
-    profile_maker_frame.pack() 
+    profile_maker_frame.pack()
 
 
 
