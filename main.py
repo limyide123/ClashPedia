@@ -11,6 +11,7 @@ import os
 from tkinter import PhotoImage
 import sqlite3
 from tkinter import Tk, filedialog
+import shutil
 
 def setup_database():
     conn = sqlite3.connect('clash_royale.db')
@@ -922,6 +923,8 @@ def save_card_to_file(name, rarity, elixir, card_type, arena, description, hitpo
         messagebox.showwarning("Input Error", "Elixir, Hitpoints, Damage, Range, Stun Duration, and Radius must be numbers.")
         return
 
+    image_path = os.path.basename(image_path)
+
     conn = sqlite3.connect('clash_royale.db')
     cursor = conn.cursor()
 
@@ -937,10 +940,18 @@ def save_card_to_file(name, rarity, elixir, card_type, arena, description, hitpo
 
 def upload_image(image_path_var):
     root = tk.Tk()
-    root.withdraw()  # Hide the main window
+    root.withdraw() 
     file_path = filedialog.askopenfilename(title="Select an image", filetypes=[('Image files', '*.png *.jpg *.jpeg')])
-    root.destroy()  # Close the file explorer window
-    image_path_var.set(file_path)  # Set the file path in the variable
+    root.destroy() 
+
+    if file_path:
+        save_dir = 'clash-royale-card-elixir'
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        file_name = os.path.basename(file_path)
+        save_path = os.path.join(save_dir, file_name)
+        shutil.copy(file_path, save_path)
+        image_path_var.set(save_path)
 
 
 def profile_maker_page():
