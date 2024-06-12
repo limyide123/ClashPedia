@@ -11,6 +11,7 @@ import os
 from tkinter import PhotoImage
 import sqlite3
 from tkinter import Tk, filedialog
+import shutil
 
 def setup_database():
     conn = sqlite3.connect('clash_royale.db')
@@ -906,7 +907,7 @@ def build_deck_page(new_window, selected_image_paths, deck_name, container_frame
     else:
         show_categories(new_window, 'rarity')
 
-def save_card_to_file(name, rarity, elixir, card_type, arena, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius, image_path=None):
+def save_card_to_file(name, rarity, elixir, card_type, arena, description, hitpoints, damage, card_range, stun_duration, shield, movement_speed, radius, image_path):
     if not name or not rarity or not elixir or not card_type or not arena or not description:
         messagebox.showwarning("Input Error", "Name, Rarity, Elixir, Type, Arena, and Description are required fields.")
         return
@@ -922,6 +923,8 @@ def save_card_to_file(name, rarity, elixir, card_type, arena, description, hitpo
         messagebox.showwarning("Input Error", "Elixir, Hitpoints, Damage, Range, Stun Duration, and Radius must be numbers.")
         return
 
+    image_path = os.path.basename(image_path)
+
     conn = sqlite3.connect('clash_royale.db')
     cursor = conn.cursor()
 
@@ -935,12 +938,20 @@ def save_card_to_file(name, rarity, elixir, card_type, arena, description, hitpo
 
     messagebox.showinfo("Success", "Card saved successfully.")
 
-def upload_image():
-    root = Tk()
-    root.withdraw()  # Hide the main window
+def upload_image(image_path_var):
+    root = tk.Tk()
+    root.withdraw() 
     file_path = filedialog.askopenfilename(title="Select an image", filetypes=[('Image files', '*.png *.jpg *.jpeg')])
-    root.destroy()  # Close the file explorer window
-    return file_path
+    root.destroy() 
+
+    if file_path:
+        save_dir = 'clash-royale-card-elixir'
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        file_name = os.path.basename(file_path)
+        save_path = os.path.join(save_dir, file_name)
+        shutil.copy(file_path, save_path)
+        image_path_var.set(save_path)
 
 
 def profile_maker_page():
@@ -1018,6 +1029,8 @@ def profile_maker_page():
     radius_entry = tk.Entry(form_frame)
     radius_entry.grid(row=12, column=1, padx=5, pady=5)
 
+    image_path_var = tk.StringVar()
+    
     save_button = tk.Button(form_frame, text="Save", command=lambda: save_card_to_file(
         name_entry.get(),
         rarity_entry.get(),
@@ -1031,14 +1044,15 @@ def profile_maker_page():
         stun_duration_entry.get(),
         shield_entry.get(),
         movement_speed_entry.get(),
-        radius_entry.get()
+        radius_entry.get(),
+        image_path_var.get() 
     ))
     save_button.grid(row=13, column=0, columnspan=2, pady=10)
 
-    upload_button = ttk.Button(form_frame, text="Upload Image", command=upload_image)
+    upload_button = ttk.Button(form_frame, text="Upload Image", command=lambda: upload_image(image_path_var))
     upload_button.grid(row=14, column=1, padx=5)
 
-    profile_maker_frame.pack() 
+    profile_maker_frame.pack()
 
 
 
