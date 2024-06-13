@@ -938,6 +938,7 @@ def save_card_to_file(name, rarity, elixir, card_type, arena, description, hitpo
 
     messagebox.showinfo("Success", "Card saved successfully.")
 
+
 def upload_image(image_path_var):
     root = tk.Tk()
     root.withdraw() 
