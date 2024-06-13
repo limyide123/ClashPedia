@@ -1047,10 +1047,10 @@ def profile_maker_page():
         radius_entry.get(),
         image_path_var.get() 
     ))
-    save_button.grid(row=13, column=0, columnspan=2, pady=10)
+    save_button.grid(row=14, column=1, columnspan=2, pady=10)
 
     upload_button = ttk.Button(form_frame, text="Upload Image", command=lambda: upload_image(image_path_var))
-    upload_button.grid(row=14, column=1, padx=5)
+    upload_button.grid(row=13, column=1, columnspan=2, padx=5, pady=10)
 
     profile_maker_frame.pack()
 
